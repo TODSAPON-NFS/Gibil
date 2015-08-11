@@ -8,7 +8,7 @@ $zones = [
         2 => "east",
         3 => "west",
 ];
-$panels = 125;
+$panels = 4;
 $stats = [
     0 => "alive",
     1 => "dead",
@@ -56,7 +56,7 @@ function simulateEvents(){
             $zone = $zones[ rand(0, sizeof($zones) - 1) ];
             $panel = rand(0, $panels);
             $status = $stats[rand(0, sizeof($stats) -1 )];
-            insertEvent($category,$zone,$panel,date(DATE_RFC2822),$status);
+            updateEvent($category,$zone,$panel,date(DATE_RFC2822),$status);
         }
         sleep(1);
     }
@@ -66,6 +66,19 @@ function insertEvent($category, $zone, $panel, $timestamp, $status){
     global $connection;
     $stmt = $connection->prepare("INSERT INTO Event (category,zone,panel,timestamp,status) Values (?,?,?,?,?)");
     $stmt->bind_param("isiss", $category, $zone, $panel, $timestamp, $status);
+    $stmt->execute();
+    if($stmt->error) {
+        printf("<b>Error: %s. </b>\n", $stmt->error);
+        return $stmt->error;
+    } else {
+        return 0;
+    }
+}
+
+function updateEvent($category, $zone, $panel, $timestamp, $status){
+    global $connection;
+    $stmt = $connection->prepare("update Event set category=?, status=?, timestamp=? where zone=? and panel=?");
+    $stmt->bind_param("isssi",$category,$status,$timestamp,$zone,$panel);
     $stmt->execute();
     if($stmt->error) {
         printf("<b>Error: %s. </b>\n", $stmt->error);
