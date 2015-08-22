@@ -1,14 +1,14 @@
 <?php
 
 $connection = NULL;
-$categories = 5;
+$categories = 8;
 $zones = [
         0 => "north",
         1 => "south",
         2 => "east",
         3 => "west",
 ];
-$panels = 4;
+$panels = 50;
 $stats = [
     0 => "alive",
     1 => "dead",
