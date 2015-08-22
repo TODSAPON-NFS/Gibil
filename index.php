@@ -1,6 +1,7 @@
 <html>
 <head>
-
+    <link href='styles/resets.css' rel='stylesheet' type='text/css' >
+    <link href='styles/styles.css' rel='stylesheet' type='text/css' >
     <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'> <!-- Add this to the head of your html before the styles-->
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 </head>
@@ -12,70 +13,6 @@
 <frameset cols="15%", *
 <h2></h2>
 
-
-<style>
-	body {
-	    font-family: 'Ubuntu', sans-serif;
-	    padding: 30px;
-	    background-color: #3C3C3C;
-	}
-
-	.wrapper {
-	    background: #ebebeb;
-	    border-radius: 5px;
-	    padding: 10px;
-	}
-
-	h1 {
-	    margin-top: 0;
-	}
-
-     .eventBox {
-	    width: 200px;
-        height: 22px;
-	    float: left;
-	    padding: 2px;
-	    margin: 3px auto;
-        position: relative;
-      }
-
-	 .eventBox .content {
-		background: #FFF;
-	    border: 1px solid #BDBDBD;
-	    border-radius: 5px;
-	    box-shadow: 0px 0px 4px 0px #B7B7B7;
-	    margin: 3px auto;
-	    padding: 2px;
-	    width: 200px;
-        height: 22px;
-        overflow: hidden;
-        position: absolute;
-	}
-
-	.statusBox {
-	    width: 30px;
-	    height: 15px;
-        position: relative;
-        float :left;
-	    border-radius: 5px;
-	    margin-bottom: 15px;
-	    border: 1px solid #E2E2E2;
-    }
-    
-    .idBox {
-	    width: 70px;
-	    height: 15px;
-        position: relative;
-        float :left;
-	    border-radius: 5px;
-	    margin-bottom: 15px;
-        border: 1px solid #E2E2E2;
-}
-
-	.clear {
-	    clear: both;
-	}
-</style>
 
 <?php
 
