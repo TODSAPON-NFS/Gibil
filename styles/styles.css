@@ -1,62 +1,65 @@
+@charset "utf-f";
+/*CSS Document*/
 
-	body {
-	    font-family: 'Ubuntu', sans-serif;
-	    padding: 30px;
-	    background-color: #3C3C3C;
-	}
 
-	.wrapper {
-	    background: #ebebeb;
-	    border-radius: 5px;
-	    padding: 10px;
-	}
-
-	h1 {
-	    margin-top: 0;
-	}
-
-     .eventBox {
-	    width: 200px;
-        height: 22px;
-	    float: left;
-	    padding: 2px;
-	    margin: 3px auto;
-        position: relative;
-      }
-
-	 .eventBox .content {
-		background: #FFF;
-	    border: 1px solid #BDBDBD;
-	    border-radius: 5px;
-	    box-shadow: 0px 0px 4px 0px #B7B7B7;
-	    margin: 3px auto;
-	    padding: 2px;
-	    width: 200px;
-        height: 22px;
-        overflow: hidden;
-        position: absolute;
-	}
-
-	.statusBox {
-	    width: 30px;
-	    height: 15px;
-        position: relative;
-        float :left;
-	    border-radius: 5px;
-	    margin-bottom: 15px;
-	    border: 1px solid #E2E2E2;
-    }
-    
-    .idBox {
-	    width: 70px;
-	    height: 15px;
-        position: relative;
-        float :left;
-	    border-radius: 5px;
-	    margin-bottom: 15px;
-        border: 1px solid #E2E2E2;
+body {
+    font-family: 'Ubuntu', sans-serif;
+    padding: 30px;
+    background-color: #3C3C3C;
 }
 
-	.clear {
-	    clear: both;
-	}
+.wrapper {
+    background: #ebebeb;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+ .eventBox {
+    width: 200px;
+    height: 22px;
+    float: left;
+    padding: 2px;
+    margin: 3px auto;
+    position: relative;
+  }
+
+ .eventBox .content {
+    background: #FFF;
+    border: 1px solid #BDBDBD;
+    border-radius: 5px;
+    box-shadow: 0px 0px 4px 0px #B7B7B7;
+    margin: 3px auto;
+    padding: 2px;
+    width: 200px;
+    height: 22px;
+    overflow: hidden;
+    position: absolute;
+}
+
+.statusBox {
+    width: 30px;
+    height: 15px;
+    position: relative;
+    float :left;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #E2E2E2;
+}
+
+.idBox {
+    width: 70px;
+    height: 15px;
+    position: relative;
+    float :left;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #E2E2E2;
+}
+
+.clear {
+    clear: both;
+}
