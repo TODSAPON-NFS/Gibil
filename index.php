@@ -28,15 +28,21 @@ function buildContainer($category, $zone, $panel, $date, $status) {
     
     $panels = getPanels();
     $zone = "";
+    echo "<div class=\"acordian\" id=\"acordian\">";
     for ($i=0; $i<count($panels); $i++){
-        /*if ($panels[$i]["zone"] != $zone) {
+        if ($panels[$i]["zone"] != $zone) {
+            if( $zone != ""){
+                echo "</div>"; //zone div
+            }
             $zone = $panels[$i]["zone"];
-            echo "<HR width=\"75%\">";
             echo "<h2>",$zone,"</h2>";
-            echo "<HR width=\"75%\">";
-        }*/
+            echo "<div class=\"",$panels[$i]["zone"]," clearfix\">";
+        }
         buildContainer($panels[$i]["category"],$panels[$i]["zone"],$panels[$i]["panel"],$panels[$i]["timestamp"],$panels[$i]["status"]);
     }
+    echo "</div>"; //zone div
+    echo "</div>"; //acordian div
+
 
 ?>
 

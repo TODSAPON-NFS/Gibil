@@ -38,7 +38,7 @@ function update(panel, zone, category, date, stat) {
     }
 }
 
-
+/*
 $(document).ready(function() {
 
 $(".content").hover(
@@ -65,3 +65,4 @@ function() {
 );
 
 });
+*/
