@@ -15,8 +15,8 @@ function getUpdate() {
   return false;
 }  
 // handles drawing an error message
-function updateError() {
-    alert("Update Error!")
+function updateError(errorText) {
+    alert("Update Error!" + errorText)
 }
 // handles the response, adds the html
 function updatePanels(responseText) {

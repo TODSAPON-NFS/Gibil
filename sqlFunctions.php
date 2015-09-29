@@ -27,6 +27,25 @@ function queryPanels(){
 	return $result;
 }
 
+function queryAllPanels(){
+    global $connection;
+    if(!$result = $connection->query(
+	'SELECT * 
+	 FROM Event 
+	 WHERE (panel, zone, timestamp) IN
+	 ( 
+		SELECT panel, zone, max(timestamp)
+		FROM Event
+		GROUP BY zone, panel
+	)')) {
+			die('There was an error running the query [' .$db->error . ']');
+		} else {
+	}
+	return $result;
+}
+
+
+
 function arrayFromSQLResult($res){
     $myArray = array();
     while ($row = $res->fetch_array(MYSQLI_ASSOC)){

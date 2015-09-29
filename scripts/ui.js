@@ -1,40 +1,41 @@
 //Javascript User interface functions
 function update(panel, zone, category, date, stat) {
-    document.getElementById( zone + "-" + panel + "-date").innerHTML = "time: "+ date;
-    document.getElementById( zone + "-" + panel + "-status").innerHTML = "status: "+ stat;
+    var panelID = parseInt(zone,10) + parseInt(panel,10)
+    document.getElementById( panelID + "-date").innerHTML = "time: "+ date;
+    document.getElementById( panelID + "-status").innerHTML = "status: "+ stat;
     
-    document.getElementById( zone + "-" + panel + "-statusboxA").style.backgroundColor = '#BCF1AB';
-    document.getElementById( zone + "-" + panel + "-statusboxA").innerHTML = 'A';
-    document.getElementById( zone + "-" + panel + "-statusboxT").style.backgroundColor = '#BCF1AB';
-    document.getElementById( zone + "-" + panel + "-statusboxT").innerHTML = 'T';
-    document.getElementById( zone + "-" + panel + "-statusboxS").style.backgroundColor = '#BCF1AB';
-    document.getElementById( zone + "-" + panel + "-statusboxS").innerHTML = 'S';
-    document.getElementById( zone + "-" + panel + "-statusboxP").style.backgroundColor = '#BCF1AB';
-    document.getElementById( zone + "-" + panel + "-statusboxP").innerHTML = 'P';
+    document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxA").innerHTML = 'A';
+    document.getElementById( panelID + "-statusboxT").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxT").innerHTML = 'T';
+    document.getElementById( panelID + "-statusboxS").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxS").innerHTML = 'S';
+    document.getElementById( panelID + "-statusboxP").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxP").innerHTML = 'P';
 
     if ( category == 0 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxA").style.backgroundColor = '#FA0012';
-        document.getElementById( zone + "-" + panel + "-statusboxA").innerHTML = 'A1';
+        document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#FA0012';
+        document.getElementById( panelID + "-statusboxA").innerHTML = 'A1';
     } else if ( category == 1 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxA").style.backgroundColor = '#FA0012';
-        document.getElementById( zone + "-" + panel + "-statusboxA").innerHTML = 'A2';
+        document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#FA0012';
+        document.getElementById( panelID + "-statusboxA").innerHTML = 'A2';
     } else if ( category == 2 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxA").style.backgroundColor = '#EFB77A';
-        document.getElementById( zone + "-" + panel + "-statusboxA").innerHTML = 'A1';
+        document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#EFB77A';
+        document.getElementById( panelID + "-statusboxA").innerHTML = 'A1';
     } else if ( category == 3 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxA").style.backgroundColor = '#EFB77A';
-        document.getElementById( zone + "-" + panel + "-statusboxA").innerHTML = 'A2';
+        document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#EFB77A';
+        document.getElementById( panelID + "-statusboxA").innerHTML = 'A2';
     } else if ( category == 4 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxT").style.backgroundColor = '#EFB77A';
-        document.getElementById( zone + "-" + panel + "-statusboxT").innerHTML = 'T';
+        document.getElementById( panelID + "-statusboxT").style.backgroundColor = '#EFB77A';
+        document.getElementById( panelID + "-statusboxT").innerHTML = 'T';
     } else if ( category == 5 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxS").style.backgroundColor = '#08D3E1';
+        document.getElementById( panelID + "-statusboxS").style.backgroundColor = '#08D3E1';
     } else if ( category == 6 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxP").style.backgroundColor = '#FFFF88';
-        document.getElementById( zone + "-" + panel + "-statusboxP").innerHTML = 'F';
+        document.getElementById( panelID + "-statusboxP").style.backgroundColor = '#FFFF88';
+        document.getElementById( panelID + "-statusboxP").innerHTML = 'F';
     } else if ( category == 7 ) {
-        document.getElementById( zone + "-" + panel + "-statusboxT").style.backgroundColor = '#FFFF88';
-        document.getElementById( zone + "-" + panel + "-statusboxT").innerHTML = 'T';
+        document.getElementById( panelID + "-statusboxT").style.backgroundColor = '#FFFF88';
+        document.getElementById( panelID + "-statusboxT").innerHTML = 'T';
     }
 }
 
