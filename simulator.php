@@ -50,7 +50,7 @@ function simulateEvents(){
     global $panels;
     global $stats;
     while( true ) {
-        $newEvents = rand(0,50);
+        $newEvents = rand(0,5);
         for ($i =0;$i < $newEvents; $i++){
             $category = rand(0, $categories);
             $zone = $zones[ rand(0, sizeof($zones) - 1) ];

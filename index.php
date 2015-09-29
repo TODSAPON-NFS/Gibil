@@ -27,8 +27,15 @@ function buildContainer($category, $zone, $panel, $date, $status) {
     include 'sqlFunctions.php';
     
     $panels = getPanels();
+// initalize the top tne panel display
+    
+
+	// initalize the main viewing platfom
     $zone = "";
     echo "<div class=\"acordian\" id=\"acordian\">";
+    echo "<h2>Recent</h2>";
+    echo "<div class = \"recent clearfix\" id=\"recent\">";
+    echo "</div>";
     for ($i=0; $i<count($panels); $i++){
         if ($panels[$i]["zone"] != $zone) {
             if( $zone != ""){

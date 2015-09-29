@@ -21,9 +21,18 @@ function updateError(errorText) {
 // handles the response, adds the html
 function updatePanels(responseText) {
     var panels = JSON.parse(responseText);
+    //sort panels by date for most recent events
+    panels.sort(function(a,b){
+	return new Date(b["timestamp"]) - new Date (a["timestamp"])
+    });
     for (i =0;i< panels.length;i++){
         update(panels[i]["panel"],panels[i]["zone"],panels[i]["category"],panels[i]["timestamp"],panels[i]["status"]);
     }
+    updateRecent(panels)	
+    //alert(panels[0]["panel"] + panels[0]["timestamp"] + panels[1]["panel"] + panels[1]["timestamp"])
+
+    //alert(panels[0]["panel"] + panels[0]["timestamp"] + panels[1]["panel"] + panels[1]["timestamp"])
+    
         
 
 }

@@ -39,6 +39,22 @@ function update(panel, zone, category, date, stat) {
     }
 }
 
+function updateRecent(panels) {
+	var recent = document.getElementById("recent");
+	while(recent.hasChildNodes()) {
+		recent.removeChild(recent.lastChild);
+	}
+	for (i=0;i< 10;i++) {
+    		var panelID = parseInt(panels[i]["zone"],10) + parseInt(panels[i]["panel"],10)
+		var original = document.getElementById(panelID + "-box");
+		var clone = original.cloneNode(true);
+		clone.id = original.id + "-recent";
+		recent.appendChild(clone);
+	}
+	
+
+}
+
 /*
 $(document).ready(function() {
 
