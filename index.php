@@ -29,22 +29,22 @@ function buildContainer($category, $zone, $panel, $date, $status) {
 	<div class="tabs">
 
 		<ul class="tab-links">
-			<li class="active"><a href="#recenttab">Recent</a><li>
+			<li class="active"><a href="#tabrecent">Recent</a></li>
 
-			<li><a href="#overviewtab">Overview</a><li>
+			<li><a href="#taboverview">Overview</a></li>
 		</ul>
 
 	<div class="tab-content">
 		
-		<div id="recenttab" class="tab active">
+		<div id="tabrecent" class="tab active">
 
 		   <div class="acordian" id="acordian recent">
 		   <br><h1>Recent</h1><br>
-			   <div class = "recent clearfix" id="recent"></div>
-		   </div>
-		</div>
+			   <div class = "recent clearfix" id="recent"></div> <!-- clarfix -->
+		   </div> <!-- acordian -->
+		</div> <!-- tabrecent -->
 		
-		<div id="overviewtab" class="tab">
+		<div id="taboverview" class="tab">
 		   <div class="acordian" id="acordian overview">
 		
 <?php

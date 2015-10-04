@@ -29,9 +29,6 @@ function updatePanels(responseText) {
         update(panels[i]["panel"],panels[i]["zone"],panels[i]["category"],panels[i]["timestamp"],panels[i]["status"]);
     }
     updateRecent(panels)	
-    //alert(panels[0]["panel"] + panels[0]["timestamp"] + panels[1]["panel"] + panels[1]["timestamp"])
-
-    //alert(panels[0]["panel"] + panels[0]["timestamp"] + panels[1]["panel"] + panels[1]["timestamp"])
     
         
 

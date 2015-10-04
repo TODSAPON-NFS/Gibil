@@ -1,16 +1,18 @@
+var GREEN = 'rgb(188, 241, 171)' //This should really change I dont really like it
+
 //Javascript User interface functions
 function update(panel, zone, category, date, stat) {
     var panelID = parseInt(zone,10) + parseInt(panel,10)
     document.getElementById( panelID + "-date").innerHTML = "time: "+ date;
     document.getElementById( panelID + "-status").innerHTML = "status: "+ stat;
     
-    document.getElementById( panelID + "-statusboxA").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxA").style.backgroundColor = GREEN;
     document.getElementById( panelID + "-statusboxA").innerHTML = 'A';
-    document.getElementById( panelID + "-statusboxT").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxT").style.backgroundColor = GREEN;
     document.getElementById( panelID + "-statusboxT").innerHTML = 'T';
-    document.getElementById( panelID + "-statusboxS").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxS").style.backgroundColor = GREEN;
     document.getElementById( panelID + "-statusboxS").innerHTML = 'S';
-    document.getElementById( panelID + "-statusboxP").style.backgroundColor = '#BCF1AB';
+    document.getElementById( panelID + "-statusboxP").style.backgroundColor = GREEN;
     document.getElementById( panelID + "-statusboxP").innerHTML = 'P';
 
     if ( category == 0 ) {
@@ -47,9 +49,18 @@ function updateRecent(panels) {
 	for (i=0;i< 50;i++) {
     		var panelID = parseInt(panels[i]["zone"],10) + parseInt(panels[i]["panel"],10)
 		var original = document.getElementById(panelID + "-box");
-		var clone = original.cloneNode(true);
-		clone.id = original.id + "-recent";
-		recent.appendChild(clone);
+		
+		//collect status
+		var alarmStatus = document.getElementById(panelID + "-statusboxA").style.backgroundColor
+		var tamperStatus = document.getElementById(panelID + "-statusboxT").style.backgroundColor
+		var supervisorStatus = document.getElementById(panelID + "-statusboxS").style.backgroundColor
+		var powerStatus = document.getElementById(panelID + "-statusboxP").style.backgroundColor
+		if ( alarmStatus != GREEN || tamperStatus != GREEN || supervisorStatus != GREEN || powerStatus != GREEN) {
+			//alert( alarmStatus + " " + tamperStatus + " " + supervisorStatus + " " + powerStatus + GREEN)
+			var clone = original.cloneNode(true);
+			clone.id = original.id + "-recent";
+			recent.appendChild(clone);
+		}
 	}
 	
 
@@ -57,7 +68,23 @@ function updateRecent(panels) {
 
 $(document).ready(function() {
 
-$(".content").hover(
+	$('.tabs .tab-links a').on('click', function(e) {
+		var currentAttrValue = $(this).attr('href');
+
+		//show hide tabs
+		$('.tabs ' + currentAttrValue).show().siblings().hide();
+
+		//change curent tab to active
+
+		$(this).parent('li').addClass('active').siblings().removeClass('active');
+		e.preventDefaults();
+	});
+
+});
+
+$(document).ready(function() {
+
+$(".content").click(
 //on mouseover
 function() {
   $(this).animate({
@@ -68,6 +95,7 @@ function() {
       zIndex: 100
   });
 },
+
 //on mouseout
 function() {
   $(this).animate({
