@@ -44,7 +44,7 @@ function updateRecent(panels) {
 	while(recent.hasChildNodes()) {
 		recent.removeChild(recent.lastChild);
 	}
-	for (i=0;i< 10;i++) {
+	for (i=0;i< 50;i++) {
     		var panelID = parseInt(panels[i]["zone"],10) + parseInt(panels[i]["panel"],10)
 		var original = document.getElementById(panelID + "-box");
 		var clone = original.cloneNode(true);
@@ -55,7 +55,6 @@ function updateRecent(panels) {
 
 }
 
-/*
 $(document).ready(function() {
 
 $(".content").hover(
@@ -82,4 +81,3 @@ function() {
 );
 
 });
-*/

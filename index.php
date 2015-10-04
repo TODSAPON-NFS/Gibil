@@ -24,34 +24,56 @@ function buildContainer($category, $zone, $panel, $date, $status) {
         echo "</div>\n";
         echo "</div>\n";
 }
+    ?>
+
+	<div class="tabs">
+
+		<ul class="tab-links">
+			<li class="active"><a href="#recenttab">Recent</a><li>
+
+			<li><a href="#overviewtab">Overview</a><li>
+		</ul>
+
+	<div class="tab-content">
+		
+		<div id="recenttab" class="tab active">
+
+		   <div class="acordian" id="acordian recent">
+		   <br><h1>Recent</h1><br>
+			   <div class = "recent clearfix" id="recent"></div>
+		   </div>
+		</div>
+		
+		<div id="overviewtab" class="tab">
+		   <div class="acordian" id="acordian overview">
+		
+<?php
     include 'sqlFunctions.php';
-    
     $panels = getPanels();
-// initalize the top tne panel display
+	// initalize the top tne panel display
     
 
 	// initalize the main viewing platfom
     $zone = "";
-    echo "<div class=\"acordian\" id=\"acordian\">";
-    echo "<h2>Recent</h2>";
-    echo "<div class = \"recent clearfix\" id=\"recent\">";
-    echo "</div>";
     for ($i=0; $i<count($panels); $i++){
         if ($panels[$i]["zone"] != $zone) {
             if( $zone != ""){
                 echo "</div>"; //zone div
             }
             $zone = $panels[$i]["zone"];
-            echo "<h2>",$zone,"</h2>";
+            echo "<br><h1>",$zone,"</h1><br>";
             echo "<div class=\"",$panels[$i]["zone"]," clearfix\">";
         }
         buildContainer($panels[$i]["category"],$panels[$i]["zone"],$panels[$i]["panel"],$panels[$i]["timestamp"],$panels[$i]["status"]);
     }
-    echo "</div>"; //zone div
-    echo "</div>"; //acordian div
-
-
 ?>
+    </div> <!--zone div -->
+    </div> <!-- acordian div -->
+    </div> <!-- overview tab div -->
+	</div> <!-- tabcontent div-->
+	</div> <!-- tab container div-->
+
+
 
 
         <div class="clear"></div>
