@@ -123,6 +123,7 @@ function updateRecent(panels) {
 }
 
 function blueTheme() {
+/*
 	//LOGO missing
 
 	//LOGO Header missing
@@ -148,6 +149,7 @@ function blueTheme() {
 		tablinks[i].style.color = "#9EA69D";
 	}
 	
+*/
 
 }
 
