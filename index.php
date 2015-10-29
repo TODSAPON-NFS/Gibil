@@ -24,11 +24,11 @@ function buildContainer($category, $zone, $panel, $date, $status) {
         echo "<div class=\"eventBox\"id=",$zone+$panel,"-box>\n";
         echo "<div class=\"content\" id=",$zone+$panel,">\n";
         //status box
-        echo "<div class=idBox id=",$zone+$panel,"-idBox style=\"background-color: #BCF1AB\">",$zone+$panel,"</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxA style=\"background-color: #BCF1AB;\">A</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxT style=\"background-color: #BCF1AB;\">T</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxS style=\"background-color: #BCF1AB;\">S</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxP style=\"background-color: #BCF1AB;\">P</div>";
+        echo "<div class=idBox id=",$zone+$panel,"-idBox >",$zone+$panel,"</div>";
+        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxA >A</div>";
+        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxT >T</div>";
+        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxS >S</div>";
+        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxP >P</div>";
         echo "<div class=label id=",$zone+$panel,"-status> status: ",$status, "</div>";
         echo "<div class=label id=",$zone+$panel,"-date> time: ",$date, "</div>";
         echo "</div>\n";

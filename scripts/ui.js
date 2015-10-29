@@ -24,8 +24,11 @@ function update(panel, zone, category, date, stat) {
 
     //multiplex based on category ( alarm status ) and set colors and text accordingly
     if ( category == 0 ) {
-        aBox.style.backgroundColor = '#FA0012';
-        aBox.innerHTML = 'A1';
+        //aBox.style.backgroundColor = '#FA0012';
+        //aBox.innerHTML = 'A1';
+
+	    aBox.classList.add("A1-alarm");
+
     } else if ( category == 1 ) {
         aBox.style.backgroundColor = '#FA0012';
         aBox.innerHTML = 'A2';

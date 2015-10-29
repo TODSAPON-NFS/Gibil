@@ -5,7 +5,7 @@
 body {
     font-family: 'Ubuntu', sans-serif;
     padding: 30px;
-    background-color: #021318;
+    background-color: #ededed;
 }
 	
 
@@ -36,16 +36,16 @@ body {
 	}
 
 	.tab-links a {
-		background:#2b393d;
-        border: 1px solid #3d4a4e;
+		background:#d4d4d4;
+        border: 1px solid #ccc;
 		border-radius:3px 3px 0px 0px;
-		color:#526267;
+        border-bottom:0;
+		color:#999;
 		display:inline-block;
 		font-size:16px;
 		font-weight:600px;
 		padding:9px 15px;
 		transition:all linear 0.15s;
-
 	}
 
     /*
@@ -56,19 +56,23 @@ body {
     */
 
 	li.active a {
-		background:#042029;
-		color:#9ea69d;
-        border: 1px solid #0c2831;
+		background:#FFF;
+		color:#373737;
+        border: 1px solid #ccc;
 		border-radius:3px 3px 0px 0px;
+        border-bottom:0;
+        position:relative;
+        top:2px;
 	}
 
 	/*-----------Contents of Tabs -----------------*/
 
 	.tab-content {
+		background:#FFF;
+        border: 1px solid #ccc;
+		border-radius:3px 3px 0px 0px;
+		color:#373737;
 		padding:15px;
-		border-radius:3px;
-		box-shadow:-1px 1px 1px rgba(0,0,0,0.15);
-		background:#003DAD;
 	}
 		
 	.tab {
@@ -94,10 +98,9 @@ h1 {
   }
 
  .eventBox .content {
-    background: #336600;
-    border: 1px solid #BDBDBD;
+    background: #ededed;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    box-shadow: 0px 0px 4px 0px #B7B7B7;
     margin: 3px auto;
     padding: 2px;
     width: 175px;
@@ -106,26 +109,34 @@ h1 {
     position: absolute;
 }
 
-.statusBox {
-    width: 30px;
-    height: 15px;
-    position: relative;
-    float :left;
-    border-radius: 5px;
-    margin-bottom: 15px;
+.idBox {
+    background:#FFF;
     border: 1px solid #E2E2E2;
-    text-align: center;
+    border-radius: 5px;
+    height: 15px;
+    float :left;
+    position: relative;
+    margin-bottom: 15px;
+    width: 45px;
 }
 
-.idBox {
-    width: 45px;
+.statusBox {
+    background:#FFF;
+    border: 1px solid #E2E2E2;
+    border-radius: 5px;
+    float :left;
     height: 15px;
     position: relative;
-    float :left;
-    border-radius: 5px;
     margin-bottom: 15px;
-    border: 1px solid #E2E2E2;
+    text-align: center;
+    width: 30px;
 }
+
+.statusBox .A1-alarm {
+    background:#e33412;
+}
+
+
 
 
 .clear {
