@@ -36,24 +36,30 @@ body {
 	}
 
 	.tab-links a {
-		padding:9px 15px;
-		display:inline-block;
+		background:#2b393d;
+        border: 1px solid #3d4a4e;
 		border-radius:3px 3px 0px 0px;
-		background:#0000FF;
+		color:#526267;
+		display:inline-block;
 		font-size:16px;
 		font-weight:600px;
-		color:#FFFFFF;
+		padding:9px 15px;
 		transition:all linear 0.15s;
+
 	}
 
+    /*
 	.tab-links a:hover {
 		background:#a7cce5;
 		text-decoration:none;
 	}
+    */
 
-	li.active a, li.active a:hover {
-		background:#003DAD;
-		color:#FFFFFF;
+	li.active a {
+		background:#042029;
+		color:#9ea69d;
+        border: 1px solid #0c2831;
+		border-radius:3px 3px 0px 0px;
 	}
 
 	/*-----------Contents of Tabs -----------------*/
