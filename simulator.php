@@ -2,6 +2,8 @@
 
 $connection = NULL;
 $categories = 8;
+//probability that the alarm will cause an error // used to normalize the events to create a more realistic enviornment
+$alarmProb = 10;
 $zones = [
         0 => 4000,
         1 => 5000,
@@ -37,9 +39,10 @@ function initPanels(){
     global $zones;
     global $panels;
     global $stats;
+    global $categories;
     for($i = 0; $i < sizeof($zones);$i++){
         for($j=0; $j< $panels;$j++){
-            insertEvent(0,$zones[$i],$j,date(DATE_RFC2822),$stats[0]);
+            insertEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]);
         }
     }
 }
@@ -49,10 +52,17 @@ function simulateEvents(){
     global $zones;
     global $panels;
     global $stats;
+    global $alarmProb;
     while( true ) {
         $newEvents = rand(0,5);
         for ($i =0;$i < $newEvents; $i++){
-            $category = rand(0, $categories);
+	    $p = rand(0,$alarmProb);
+	    if($p == 0 ) {
+            	$category = rand(0, $categories); //otherwise an alarm occurs
+	    } else {
+		$category = $categories; //max value is used as the non alarm state
+	    }
+		
             $zone = $zones[ rand(0, sizeof($zones) - 1) ];
             $panel = rand(0, $panels);
             $status = $stats[rand(0, sizeof($stats) -1 )];
