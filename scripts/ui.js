@@ -10,8 +10,8 @@ function update(panel, zone, category, date, stat) {
     
     //set all elements to default values
     var aBox = document.getElementById( panelID + "-statusboxA")
-    aBox.style.backgroundColor = GREEN;
-    aBox.innerHTML = 'A';
+    //aBox.style.backgroundColor = GREEN;
+    //aBox.innerHTML = 'A';
     var tBox = document.getElementById( panelID + "-statusboxT")
     tBox.style.backgroundColor = GREEN;
     tBox.innerHTML = 'T';
@@ -25,8 +25,7 @@ function update(panel, zone, category, date, stat) {
     //multiplex based on category ( alarm status ) and set colors and text accordingly
     if ( category == 0 ) {
         //aBox.style.backgroundColor = '#FA0012';
-        //aBox.innerHTML = 'A1';
-
+        aBox.innerHTML = 'A1';
 	    aBox.classList.add("A1-alarm");
 
     } else if ( category == 1 ) {
