@@ -42,7 +42,11 @@ function initPanels(){
     global $categories;
     for($i = 0; $i < sizeof($zones);$i++){
         for($j=0; $j< $panels;$j++){
-            insertEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]);
+		//attempt to update existing database, if the events do not exist then insert them
+            if (insertEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]) != 0) {
+            	updateEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]);
+		}
+		
         }
     }
 }

@@ -12,6 +12,6 @@ create table Event
 	panel int not null,
 	timestamp varchar(64) not null,
     status varchar(64),
-	primary key (zone, panel, timestamp));
+	primary key (zone, panel));
 
 commit;
