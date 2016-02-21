@@ -1,6 +1,6 @@
 <?php
     include 'sqlFunctions.php';
-    $panels = getPanels();
-    echo json_encode($panels);
+    $accounts = getAccounts();
+    echo json_encode($accounts);
 ?>
 

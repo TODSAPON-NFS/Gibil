@@ -19,39 +19,40 @@ ini_set('display_startup_errors',1);
 error_reporting(-1);
 
 
-//buildContainer constructs a panel container based on the category ( status id ) of the panel, its zone (4000 ... 5000 etc), it's timestamp and written status 
-function buildContainer($category, $zone, $panel, $date, $status) {
-        echo "<div class=\"eventBox\"id=",$zone+$panel,"-box>\n";
-        echo "<div class=\"content\" id=",$zone+$panel,">\n";
+function buildContainer($account) {
+	$accountn = $account["account"];
+        echo "<div class=\"eventBox\"id=",$accountn,"-box>\n";
+        echo "<div class=\"content\" id=",$accountn,">\n";
         //status box
-        echo "<div class=idBox id=",$zone+$panel,"-idBox >",$zone+$panel,"</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxA >A</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxT >T</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxS >S</div>";
-        echo "  <div class=\"statusBox\" id=",$zone+$panel,"-statusboxP >P</div>";
-        echo "<div class=label id=",$zone+$panel,"-status> status: ",$status, "</div>";
-        echo "<div class=label id=",$zone+$panel,"-date> time: ",$date, "</div>";
+        echo "<div class=idBox id=",$accountn,"-idBox >",$accountn,"</div>";
+        echo "  <div class=\"statusBox\" id=",$accountn,"-alarm >A</div>";
+        echo "  <div class=\"statusBox\" id=",$accountn,"-trouble >T</div>";
+        echo "  <div class=\"statusBox\" id=",$accountn,"-supervisory >S</div>";
+        echo "  <div class=\"statusBox\" id=",$accountn,"-power >P</div>";
+        echo "<div class=label id=",$accountn,"-status> status: ",$account["message"], "</div>";
+        echo "<div class=label id=",$accountn,"-date> time: ",$account["timestamp"], "</div>";
         echo "</div>\n";
         echo "</div>\n";
 }
 
-function initalizePanels() {
+function initalizeAccounts() {
     include 'sqlFunctions.php';
-    $panels = getPanels();
-    $zone = "";
-    for ($i=0; $i<count($panels); $i++){
-        if ($panels[$i]["zone"] != $zone) {
-            if( $zone != ""){
-                echo "</div>"; //zone div
+    $accounts = getAccounts();
+    for ($i=0; $i<count($accounts); $i++){
+	$account = $accounts[$i];
+	//start a new div for each grouping of accounts by the thousands
+        if ($account["account"] % 1000 == 0) {
+            if( $account["account"] != "4000"){
+                echo "</div>"; //account group div
             }
-            $zone = $panels[$i]["zone"];
-            echo "<br><h1>",$zone,"</h1><br>";
-            echo "<div class=\"",$panels[$i]["zone"]," clearfix\">";
+            echo "<br><h1>",$account["account"],"</h1><br>";
+            echo "<div class=\"",$account["account"]," clearfix\">";
         }
-        buildContainer($panels[$i]["category"],$panels[$i]["zone"],$panels[$i]["panel"],$panels[$i]["timestamp"],$panels[$i]["status"]);
+        buildContainer($account);
     }
-    echo "</div>"; //final zone div closure
+    echo "</div>"; //final account div closure
 }
+
 ?>
 
 
@@ -78,7 +79,7 @@ function initalizePanels() {
 			<div id="taboverview" class="tab">
 			   <div class="acordian" id="acordian overview">
 				<?php
-					initalizePanels();
+					initalizeAccounts();
 				?>
 			
 			   </div> <!-- acordian div -->

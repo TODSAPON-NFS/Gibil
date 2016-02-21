@@ -18,7 +18,7 @@ function construct(){
         }
 }
 
-function queryPanels(){
+function queryAccounts(){
     global $connection;
     if(!$result = $connection->query("Select * FROM Event")) {
 			die('There was an error running the query [' .$db->error . ']');
@@ -27,7 +27,8 @@ function queryPanels(){
 	return $result;
 }
 
-function queryAllPanels(){
+/*
+function queryAllAccounts(){
     global $connection;
     if(!$result = $connection->query(
 	'SELECT * 
@@ -43,7 +44,7 @@ function queryAllPanels(){
 	}
 	return $result;
 }
-
+*/
 
 
 function arrayFromSQLResult($res){
@@ -54,11 +55,11 @@ function arrayFromSQLResult($res){
     return $myArray;
 }
 
-function getPanels(){
+function getAccounts(){
     construct();
-    $res = queryPanels();
-    $panelArray = arrayFromSQLResult($res);
+    $res = queryAccounts();
+    $accountArray = arrayFromSQLResult($res);
     $res->close();
-    return $panelArray;
+    return $accountArray;
 }
 ?>
