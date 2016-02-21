@@ -3,20 +3,25 @@
 $connection = NULL;
 $categories = 8;
 //probability that the alarm will cause an error // used to normalize the events to create a more realistic enviornment
-$alarmProb = 10;
-$zones = [
-        0 => 4000,
-        1 => 5000,
-        2 => 6000,
-        3 => 7000,
-];
-$panels = 100;
+$alarmProb = 2;
+$accountsPerGroup = 100;
+$groups = 4;
+$groupGap = 1000;
+$startingAccount = 4000;
 $stats = [
-    0 => "alive",
-    1 => "dead",
-    2 => "thinking",
-    3 => "sleeping",
-    4 => "zombie"];
+    "alarm" => [
+	"zone" => ["1","A"],
+	"state" => ["1","2"]],
+    "supervisory" => [
+	"zone" => ["2","B"],
+	"state" => ["1","2"]],
+    "trouble" => [
+	"zone" => ["3","C"],
+	"state" => ["1","2"]],
+    "power" => [
+	"zone" => ["4"],
+	"state" => ["1","2"]],
+];
 
 function construct(){
         $server = '127.0.0.1';
@@ -36,72 +41,98 @@ function construct(){
 }
 
 function initPanels(){
-    global $zones;
-    global $panels;
-    global $stats;
-    global $categories;
-    for($i = 0; $i < sizeof($zones);$i++){
-        for($j=0; $j< $panels;$j++){
+	global $alarmProb;
+	global $accountsPerGroup;
+	global $groups;
+	global $groupGap;
+	global $startingAccount;
+    	global $panels;
+    	global $stats;
+    	for($i = 0; $i < $groups;$i++){
+        for($j=0; $j< $accountsPerGroup;$j++){
 		//attempt to update existing database, if the events do not exist then insert them
-            if (insertEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]) != 0) {
-            	updateEvent($categories,$zones[$i],$j,date(DATE_RFC2822),$stats[0]);
-		}
-		
+		echo $i * $groupGap + $startingAccount + $j;
+		if(insertEvent(($i * $groupGap + $startingAccount + $j),
+			$stats["alarm"]["zone"][0], $stats["alarm"]["state"][0],
+			$stats["supervisory"]["zone"][0], $stats["supervisory"]["state"][0],
+			$stats["trouble"]["zone"][0], $stats["trouble"]["state"][0],
+			$stats["power"]["zone"][0], $stats["power"]["state"][0],
+			date(DATE_RFC2822),"Simulated") != 0) {
+
+				updateEvent(($i * $groupGap + $startingAccount + $j),
+				$stats["alarm"]["zone"][0], $stats["alarm"]["state"][0],
+				$stats["supervisory"]["zone"][0], $stats["supervisory"]["state"][0],
+				$stats["trouble"]["zone"][0], $stats["trouble"]["state"][0],
+				$stats["power"]["zone"][0], $stats["power"]["state"][0],
+				date(DATE_RFC2822),"Simulated");
+			}
         }
     }
+}
+
+
+function insertEvent($account, $az, $as, $sz, $ss, $tz, $ts, $pz, $ps, $timestamp,$message){
+    global $connection;
+	
+$stmt = $connection->prepare("INSERT INTO Event (account,alarmzone,alarmstate,supervisoryzone,supervisorystate,troublezone,troublestate,powerzone,powerstate,timestamp,message) Values (?,?,?,?,?,?,?,?,?,?,?)");
+    $stmt->bind_param("issssssssss", $account, $az, $as, $sz, $ss, $tz, $ts, $pz, $ps, $timestamp,$message);
+    $stmt->execute();
+    if($stmt->error) {
+        printf("<b>Error: %s. </b>\n", $stmt->error);
+        return $stmt->error;
+    } else {
+        return 0;
+    }
+}
+function updateEvent($account, $az, $as, $sz, $ss, $tz, $ts, $pz, $ps, $timestamp,$message){
+    global $connection;
+	
+$stmt = $connection->prepare("update Event set alarmzone=?, alarmstate=?, supervisoryzone=?, supervisorystate=?, troublezone=?, troublestate=?, powerzone=?, powerstate=?, timestamp=?, message=? where account=?");
+    $stmt->bind_param("ssssssssssi", $az, $as, $sz, $ss, $tz, $ts, $pz, $ps, $timestamp,$message,$account);
+    $stmt->execute();
+    if($stmt->error) {
+        printf("<b>Error: %s. </b>\n", $stmt->error);
+        return $stmt->error;
+    } else {
+        return 0;
+    }
+}
+
+//alarm randomly generates alarm
+function alarm(){
+	global $alarmProb;
+	$alarm = rand(0,$alarmProb);
+	if($alarm == 0 ) {
+		return 1;
+	} 
+	return 0;
 }
 
 function simulateEvents(){
-    global $categories;
-    global $zones;
-    global $panels;
-    global $stats;
-    global $alarmProb;
-    while( true ) {
-        $newEvents = rand(0,5);
-        for ($i =0;$i < $newEvents; $i++){
-	    $p = rand(0,$alarmProb);
-	    if($p == 0 ) {
-            	$category = rand(0, $categories); //otherwise an alarm occurs
-	    } else {
-		$category = $categories; //max value is used as the non alarm state
-	    }
-		
-            $zone = $zones[ rand(0, sizeof($zones) - 1) ];
-            $panel = rand(0, $panels);
-            $status = $stats[rand(0, sizeof($stats) -1 )];
-            updateEvent($category,$zone,$panel,date(DATE_RFC2822),$status);
-        }
-        sleep(1);
-    }
+	global $alarmProb;
+	global $accountsPerGroup;
+	global $groups;
+	global $groupGap;
+	global $startingAccount;
+    	global $panels;
+    	global $stats;
+	while( true ) {
+		$newEvents = rand(0,5);
+		for ($i =0;$i < $newEvents; $i++){
+			$az = $stats["alarm"]["zone"][alarm()];
+			$as = $stats["alarm"]["state"][alarm()];
+			$sz = $stats["supervisory"]["zone"][alarm()];
+			$ss = $stats["supervisory"]["state"][alarm()];
+			$tz = $stats["trouble"]["zone"][alarm()];
+			$ts = $stats["trouble"]["state"][alarm()];
+			$pz = $stats["power"]["zone"][0];
+			$ps = $stats["power"]["state"][alarm()];
+			$account = $startingAccount + (rand(0, $groups) * $groupGap) + rand(0, $accountsPerGroup);
+			updateEvent($account, $az, $as, $sz, $ss, $tz, $ts, $pz, $ps, date(DATE_RFC2822),"Simulated");
+		}
+	}
 }
-
-function insertEvent($category, $zone, $panel, $timestamp, $status){
-    global $connection;
-    $stmt = $connection->prepare("INSERT INTO Event (category,zone,panel,timestamp,status) Values (?,?,?,?,?)");
-    $stmt->bind_param("iiiss", $category, $zone, $panel, $timestamp, $status);
-    $stmt->execute();
-    if($stmt->error) {
-        printf("<b>Error: %s. </b>\n", $stmt->error);
-        return $stmt->error;
-    } else {
-        return 0;
-    }
-}
-
-function updateEvent($category, $zone, $panel, $timestamp, $status){
-    global $connection;
-    $stmt = $connection->prepare("update Event set category=?, status=?, timestamp=? where zone=? and panel=?");
-    $stmt->bind_param("issii",$category,$status,$timestamp,$zone,$panel);
-    $stmt->execute();
-    if($stmt->error) {
-        printf("<b>Error: %s. </b>\n", $stmt->error);
-        return $stmt->error;
-    } else {
-        return 0;
-    }
-}
-
+			
 construct();
 initPanels();
 simulateEvents();
