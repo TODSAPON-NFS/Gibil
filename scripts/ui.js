@@ -1,54 +1,123 @@
-var GREEN = 'rgb(188, 241, 171)' //This should really change I dont really like it
+var GREEN = '#BCF1AB'; //This should really change I dont really like it
+var RED = '#FA0012'; //This should really change I dont really like it
+var YELLOW = '#EFB77A';
+var BLUE = '#08D3E1';
+var AMBER = '#FFFF88';
 
+var GrayLevel = 50;
 //Javascript User interface functions
-function update(panel, zone, category, date, stat) {
-    var panelID = parseInt(zone,10) + parseInt(panel,10)
+
+function update(panel) {
     
     //update the date and status
-    document.getElementById( panelID + "-date").innerHTML = "time: "+ date;
-    document.getElementById( panelID + "-status").innerHTML = "status: "+ stat;
+    document.getElementById( panel["account"] + "-date").innerHTML = "time: "+ panel["timestamp"];
+    document.getElementById( panel["account"] + "-status").innerHTML = "status: "+ panel["message"];
     
     //set all elements to default values
-    var aBox = document.getElementById( panelID + "-statusboxA")
-    //aBox.style.backgroundColor = GREEN;
+    var aBox = document.getElementById( panel["account"] + "-alarm")
     //aBox.innerHTML = 'A';
-    var tBox = document.getElementById( panelID + "-statusboxT")
-    tBox.style.backgroundColor = GREEN;
+    var tBox = document.getElementById( panel["account"] + "-trouble")
     tBox.innerHTML = 'T';
-    var sBox = document.getElementById( panelID + "-statusboxS")
-    sBox.style.backgroundColor = GREEN;
+    var sBox = document.getElementById( panel["account"] + "-supervisory")
     sBox.innerHTML = 'S';
-    var pBox = document.getElementById( panelID + "-statusboxP")
-    pBox.style.backgroundColor = GREEN;
+    var pBox = document.getElementById( panel["account"] + "-power")
     pBox.innerHTML = 'P';
-
-    //multiplex based on category ( alarm status ) and set colors and text accordingly
-    if ( category == 0 ) {
-        //aBox.style.backgroundColor = '#FA0012';
-        aBox.innerHTML = 'A1';
-	    aBox.classList.add("A1-alarm");
-
-    } else if ( category == 1 ) {
-        aBox.style.backgroundColor = '#FA0012';
-        aBox.innerHTML = 'A2';
-    } else if ( category == 2 ) {
-        aBox.style.backgroundColor = '#EFB77A';
-        aBox.innerHTML = 'A1';
-    } else if ( category == 3 ) {
-        aBox.style.backgroundColor = '#EFB77A';
-        aBox.innerHTML = 'A2';
-    } else if ( category == 4 ) {
-        tBox.style.backgroundColor = '#EFB77A';
-        tBox.innerHTML = 'T';
-    } else if ( category == 5 ) {
-        sBox.style.backgroundColor = '#08D3E1';
-    } else if ( category == 6 ) {
-        pBox.style.backgroundColor = '#FFFF88';
-        pBox.innerHTML = 'F';
-    } else if ( category == 7 ) {
-        tBox.style.backgroundColor = '#FFFF88';
-        tBox.innerHTML = 'T';
-    }
+	//alarm
+	switch (panel["alarmzone"]){
+	case "1":
+		switch (panel["alarmstate"]){
+		case "1":
+        		aBox.innerHTML = 'A';
+        		aBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		aBox.innerHTML = 'A';
+        		aBox.style.backgroundColor = RED;
+			break;
+		break;
+		}
+	case "A":
+		switch (panel["alarmstate"]){
+		case "1":
+        		aBox.innerHTML = 'A';
+        		aBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		aBox.innerHTML = 'A';
+        		aBox.style.backgroundColor = tinycolor(RED).desaturate(GrayLevel).toHexString();
+			break;
+		break;
+		}
+	}
+	//trouble
+	switch (panel["troublezone"]){
+	case "3":
+		switch (panel["troublestate"]){
+		case "1":
+        		tBox.innerHTML = 'T';
+        		tBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		tBox.innerHTML = 'T';
+        		tBox.style.backgroundColor = YELLOW;
+			break;
+		break;
+		}
+	case "C":
+		switch (panel["troublestate"]){
+		case "1":
+        		tBox.innerHTML = 'T';
+        		tBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		tBox.innerHTML = 'T';
+        		tBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
+			break;
+		break;
+		}
+	}
+	//supervisory
+	switch (panel["supervisoryzone"]){
+	case "2":
+		switch (panel["supervisorystate"]){
+		case "1":
+        		sBox.innerHTML = 'S';
+        		sBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		sBox.innerHTML = 'S';
+        		sBox.style.backgroundColor = BLUE;
+			break;
+		break;
+		}
+	case "B":
+		switch (panel["supervisorystate"]){
+		case "1":
+        		sBox.innerHTML = 'S';
+        		sBox.style.backgroundColor = BLUE;
+			break;
+		case "2":
+        		sBox.innerHTML = 'S';
+        		sBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
+			break;
+		break;
+		}
+	}
+	//power
+	switch (panel["powerzone"]){
+	case "4":
+		switch (panel["powerstate"]){
+		case "1":
+        		pBox.innerHTML = 'P';
+        		pBox.style.backgroundColor = GREEN;
+			break;
+		case "2":
+        		pBox.innerHTML = 'P';
+        		pBox.style.backgroundColor = AMBER;
+			break;
+		break;
+		}
+	}
 }
 
 
@@ -58,22 +127,22 @@ function updateRecent(panels) {
 	var newEvents = document.getElementById("new");
 	var oldEvents = document.getElementById("old");
 	for (i=panels.length -1 ;i>=0;i--) {
-    		var panelID = parseInt(panels[i]["zone"],10) + parseInt(panels[i]["panel"],10)
-		var original = document.getElementById(panelID + "-box");
+		var panel = panels[i];
+		var original = document.getElementById(panel["account"] + "-box");
 		
 		//clone the panel being examined
 		var clone = original.cloneNode(true);
 		clone.id = original.id + "-recent";
 		
 		//collect status
-		var alarmStatus = document.getElementById(panelID + "-statusboxA").style.backgroundColor;
-		var tamperStatus = document.getElementById(panelID + "-statusboxT").style.backgroundColor;
-		var supervisorStatus = document.getElementById(panelID + "-statusboxS").style.backgroundColor;
-		var powerStatus = document.getElementById(panelID + "-statusboxP").style.backgroundColor;
+		var alarmStatus = document.getElementById(panel["account"] + "-alarm").style.backgroundColor;
+		var tamperStatus = document.getElementById(panel["account"] + "-trouble").style.backgroundColor;
+		var supervisorStatus = document.getElementById(panel["account"] + "-supervisory").style.backgroundColor;
+		var powerStatus = document.getElementById(panel["account"] + "-power").style.backgroundColor;
 			
 		
 		//discriminate catagory based on age of the update
-		var eventTime = new Date(panels[i]["timestamp"]);
+		var eventTime = new Date(panel["timestamp"]);
 		var breakPointTime = new Date();
 
 		//TODO 15 second diff ( eventually 24h )

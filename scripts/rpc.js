@@ -26,7 +26,7 @@ function updatePanels(responseText) {
 	return new Date(b["timestamp"]) - new Date (a["timestamp"])
     });
     for (i =0;i< panels.length;i++){
-        update(panels[i]["panel"],panels[i]["zone"],panels[i]["category"],panels[i]["timestamp"],panels[i]["status"]);
+        update(panels[i]);
     }
     updateRecent(panels)	
     
