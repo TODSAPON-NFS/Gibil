@@ -492,7 +492,6 @@ class phpSerial
 					$content .= fread($this->_dHandle, 128);
 				} while (($i += 128) === strlen($content));
 			}
-
 			return $content;
 		}
 		elseif ($this->_os === "windows")
