@@ -38,17 +38,20 @@ function buildContainer($account) {
 function initalizeAccounts() {
     include 'sqlFunctions.php';
     $accounts = getAccounts();
+    $prevRange = 0;
     for ($i=0; $i<count($accounts); $i++){
 	$account = $accounts[$i];
+	$range = floor($account["account"] / 1000) * 1000;
 	//start a new div for each grouping of accounts by the thousands
-        if ($account["account"] % 1000 == 0) {
-            if( $account["account"] != "4000"){
+        if ($range > $prevRange) {
+            if( $prevRange != 0){
                 echo "</div>"; //account group div
             }
-            echo "<br><h1>",$account["account"],"</h1><br>";
-            echo "<div class=\"",$account["account"]," clearfix\">";
+            echo "<br><h1>",$range,"</h1><br>";
+            echo "<div class=\"",$range," clearfix\">";
         }
         buildContainer($account);
+	$prevRange = $range;
     }
     echo "</div>"; //final account div closure
 }

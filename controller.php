@@ -57,7 +57,38 @@ class Panel {
 		}
 		return "";
 	}
+
+	//construct a new panel in the off state
+	function Panel($account){
+		//Set the default time to UNIX EPOCH
+		$epochTime = new DateTime();
+		$epochTime->setTimestamp(0);
+		$stamp = $epochTime->format(DateTime::RFC2822);
+		
+		$this->account = $account;
+		$this->az = "1";
+		$this->as = "1";
+		$this->at = $stamp;
+		$this->sz = "2";
+		$this->ss = "1";
+		$this->st = $stamp;
+		$this->tz = "3";
+		$this->ts = "1";
+		$this->tt = $stamp;
+		$this->pz = "4";
+		$this->ps = "1";
+		$this->pt = $stamp;
+		$this->timestamp = $stamp;
+		$this->message = "NEW PANEL";
+		//no timestamps in the default
+		return $this;
+	}
+
 }
+
+//-----------------------------------------------------------------------//
+/*			Start Execution Here				 */
+//-----------------------------------------------------------------------//
 
 $db = NULL;
 $eventQueue = new SplQueue();
@@ -362,7 +393,7 @@ function insertEvents() {
 		//If the panel has no timestamp it is not in the DB yet
 		if ($panel->timestamp == ""){
 			//addToDB
-			$panel = defaultPanel($event->account);
+			$panel = new Panel($event->account);
 			$panel = updatePanel($panel,$event);
 			insertPanelDB($panel);
 			echo "New Panel";
@@ -382,22 +413,6 @@ function insertEvents() {
 	
 }
 
-//construct a new panel in the off state
-function defaultPanel($account){
-	$panel = new Panel();
-	$panel->account = $account;
-	$panel->az = "1";
-	$panel->as = "1";
-	$panel->sz = "2";
-	$panel->ss = "1";
-	$panel->tz = "3";
-	$panel->ts = "1";
-	$panel->pz = "4";
-	$panel->ps = "1";
-	$panel->message = "NEW PANEL";
-	//no timestamps in the default
-	return $panel;
-}
 
 function updatePanel($panel, $event) {
 	//update timestamp will have to be distributed later
@@ -408,20 +423,24 @@ function updatePanel($panel, $event) {
 			$panel->az = $event->zone;
 			$panel->as = $event->status;
 			$panel->at = $panel->timestamp;
+			break;
 		case "2":
 		case "B":
 			$panel->sz = $event->zone;
 			$panel->ss = $event->status;
 			$panel->st = $panel->timestamp;
+			break;
 		case "3":
 		case "C":
 			$panel->tz = $event->zone;
 			$panel->ts = $event->status;
 			$panel->tt = $panel->timestamp;
+			break;
 		case "4":
 			$panel->pz = $event->zone;
 			$panel->ps = $event->status;
 			$panel->pt = $panel->timestamp;
+			break;
 		default:
 	}
 	return $panel;

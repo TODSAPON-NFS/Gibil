@@ -15,7 +15,7 @@ function update(panel) {
     
     //set all elements to default values
     var aBox = document.getElementById( panel["account"] + "-alarm")
-    //aBox.innerHTML = 'A';
+    aBox.innerHTML = 'A';
     var tBox = document.getElementById( panel["account"] + "-trouble")
     tBox.innerHTML = 'T';
     var sBox = document.getElementById( panel["account"] + "-supervisory")
@@ -34,20 +34,20 @@ function update(panel) {
         		aBox.innerHTML = 'A';
         		aBox.style.backgroundColor = RED;
 			break;
-		break;
 		}
+		break;
 	case "A":
 		switch (panel["alarmstate"]){
 		case "1":
         		aBox.innerHTML = 'A';
-        		aBox.style.backgroundColor = GREEN;
+        		aBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
 			break;
 		case "2":
         		aBox.innerHTML = 'A';
         		aBox.style.backgroundColor = tinycolor(RED).desaturate(GrayLevel).toHexString();
 			break;
-		break;
 		}
+		break;
 	}
 	//trouble
 	switch (panel["troublezone"]){
@@ -61,8 +61,8 @@ function update(panel) {
         		tBox.innerHTML = 'T';
         		tBox.style.backgroundColor = YELLOW;
 			break;
-		break;
 		}
+		break;
 	case "C":
 		switch (panel["troublestate"]){
 		case "1":
@@ -73,8 +73,8 @@ function update(panel) {
         		tBox.innerHTML = 'T';
         		tBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
 			break;
-		break;
 		}
+		break;
 	}
 	//supervisory
 	switch (panel["supervisoryzone"]){
@@ -88,20 +88,20 @@ function update(panel) {
         		sBox.innerHTML = 'S';
         		sBox.style.backgroundColor = BLUE;
 			break;
-		break;
 		}
+		break;
 	case "B":
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
-        		sBox.style.backgroundColor = BLUE;
+        		sBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
 			break;
 		case "2":
         		sBox.innerHTML = 'S';
         		sBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
 			break;
-		break;
 		}
+		break;
 	}
 	//power
 	switch (panel["powerzone"]){
@@ -115,8 +115,8 @@ function update(panel) {
         		pBox.innerHTML = 'P';
         		pBox.style.backgroundColor = AMBER;
 			break;
-		break;
 		}
+		break;
 	}
 }
 
@@ -133,6 +133,8 @@ function updateRecent(panels) {
 		//clone the panel being examined
 		var clone = original.cloneNode(true);
 		clone.id = original.id + "-recent";
+
+	original.clone(false).find("*[id]").andSelf().each(function() { $(this).attr("id", $(this).attr("id") + "_cloned"); });
 		
 		//collect status
 		var alarmStatus = document.getElementById(panel["account"] + "-alarm").style.backgroundColor;
