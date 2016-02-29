@@ -8,7 +8,7 @@ This server displays fire alarm events generated at on the UBC vancouver campus
 ### Operating System
 Ubuntu 14.04 Trusty Tahr
 
-### Installation Steps
+## Installation Steps (Web Server)
 install lamp stack
 `sudo apt-get update`
 `sudo apt-get install lamp-server`
@@ -30,3 +30,14 @@ initalize the db
 `mysql -u root -p < initdb.sql`
 
 
+## Installation Steps (Serial Interface)
+
+Install setserial
+`sudo apt-get install setserial`
+
+add apache and www-data to the dialout usergroup
+`sudo useradd -g apache dialout`
+`sudo useradd -g www-data dialout`
+
+if nessisary change the privilages of the serial port in use
+`sudo chmod 777 \dev\ttyS_`

@@ -25,8 +25,8 @@ $stats = [
 
 function construct(){
         $server = '127.0.0.1';
-		$user = 'root';
-		$pass = 'iwicbV15';
+	$user = 'root';
+	$pass = 'iwicbV15';
         $dbname = 'Gibil';
         
         global $connection;

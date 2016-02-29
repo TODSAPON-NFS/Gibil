@@ -7,6 +7,39 @@ define ("LONGMESSAGELEN", 22);
 define ("POLLINGTIME", 5 * 60);
 define ("POLLINGWAIT", 30);
 
+
+class Event {
+	public $account;
+	public $zone;
+	public $status;
+	public $timestamp;
+	
+	function String() {
+		return sprintf("[Account :%s, Zone :%s, Status :%s, Timestamp %s]",$this->account,$this->zone,$this->status,$this->timestamp->format(DateTime::RFC2822));
+	}
+}
+
+class Panel {
+	public $account;
+	public $az;
+	public $as;
+	public $sz;
+	public $ss;
+	public $tz;
+	public $ts;
+	public $pz;
+	public $ps;
+	public $timestamp;
+	public $message;
+	
+	function String() {
+		return sprintf("[account :%s az :%s as :%s sz :%s ss :%s tz :%s ts :%s pz :%s ps :%s timestamp :%s message %s]",$this->account, $this->az, $this->as, $this->sz, $this->ss, $this->tz, $this->ts, $this->pz, $this->ps, $this->timestamp,$this->message);
+	}
+}
+
+$db = NULL;
+$eventQueue = new SplQueue();
+
 // Let's start the class
 $serial = new phpSerial;
 
@@ -29,16 +62,55 @@ $POLL = [
 	"4000" => time() - POLLINGTIME, //inital
 	"5000" => time() - POLLINGTIME + 60,
 	"6000" => time() - POLLINGTIME + 120,
-	"7000" => time() - POLIINGTIME + 180,
+	"7000" => time() - POLLINGTIME + 180,
 ];
 //True if polling is happening
 $POLLING = 0;
 
 
 while(true){
-	messageHandle();
+	if(messageHandle()){
+		//do if a message was received
+	} else {
+		//non message received tasks
+		pollingRoutine();
+		insertEvents();
+	}
 	
-	//Poll only if no polling is occuring
+	
+}
+
+
+
+
+
+//$serial->sendMessage("r4001/100\r",1);
+//$serial->sendMessage("e1\r");
+//$serial->sendMessage("f\r");
+//$serial->sendMessage(ACK);
+
+//$serial->sendMessage("r4001/100\r",1);
+
+/*
+$clockReset="cw010101000000AAAAA";
+echo genchecksum($clockReset);
+$clockReset = $clockReset . genchecksum($clockReset) . "\r";
+echo $clockReset;
+echo strlen($clockReset);
+$serial->sendMessage($clockReset);
+*/
+
+
+
+// If you want to change the configuration, the device must be closed
+$serial->deviceClose();
+
+
+function pollingRoutine(){
+	global $serial;
+	global $POLL;
+	global $POLLING;
+	//Poll only if no polling is occuring and no messages were received
 	$time = time();
 	if ($time - $POLLING > POLLINGWAIT){
 		$didPoll = false;
@@ -68,49 +140,12 @@ while(true){
 			$POLLING = $time;
 		}
 	}
-	
+
 }
-
-
-
-
-
-//$serial->sendMessage("r4001/100\r",1);
-//$serial->sendMessage("e1\r");
-//$serial->sendMessage("f\r");
-//$serial->sendMessage(ACK);
-
-$serial->sendMessage("r4001/100\r",1);
-
-/*
-$clockReset="cw010101000000AAAAA";
-echo genchecksum($clockReset);
-$clockReset = $clockReset . genchecksum($clockReset) . "\r";
-echo $clockReset;
-echo strlen($clockReset);
-$serial->sendMessage($clockReset);
-*/
-while ($read = $serial->readPort()){
-	echo $read;
-	$hex = strToHex($read);
-	checksum($hex);
-	//echo $hex;
-	echo strlen($read) + "\n";
-	echo $read;
-	printf("%d\n",$read);
-	//$serial->sendMessage("cr\r");
-	//sleep(.5);
-	$serial->sendMessage(ACK);
-}
-
-
-
-// If you want to change the configuration, the device must be closed
-$serial->deviceClose();
-
 
 function messageHandle(){
 	global $serial;
+	global $eventQueue;
 	$read = $serial->readPort();
 
 	switch (strlen($read)) {
@@ -125,7 +160,12 @@ function messageHandle(){
 				case "M": 
 				case "U":
 				case "E":
-					//$event = parseEvent($read);
+					$event = parseEventSimulator($read);
+					//TODO in the end no events should be null
+					if ($event != null ){
+						$eventQueue->enqueue($event);
+						echo $event->String()."\n";
+					}
 					break;
 				//clock read
 				case "C":
@@ -157,10 +197,68 @@ function messageHandle(){
 			}
 			break;
 		case 0:
-			return;
+			return false;
 		default:
+			//TODO check how many bad messages have happened recently and give up at some point if it breaks
 			echo "Bad message length: ". strlen($read) . " for command " . $read . "\n";
+			//TODO stop throwing away bad events $serial->sendMessage(NAK);
+			$serial->sendMessage(ACK);
 	}
+	//assume messages were received
+	return true;
+}
+
+
+//TODO remove later this is a testing function
+function parseEventSimulator($message) {
+	$event = new Event();
+	$mon = substr($message,1,2);
+	$d = substr($message,3,2);
+	$y = substr($message,5,2);
+	$h = substr($message,7,2);
+	$min = substr($message,9,2);
+	$s = substr($message,11,2);
+
+	$datestr = "20".$y."-".$d."-".$mon." ".$h.":".$min.":".$s;
+	$event->timestamp = \DateTime::createFromFormat('Y-d-m H:i:s',$datestr);
+	if (! $event->timestamp) {
+	    echo sprintf("'%s' is not a valid date.", $datestr);
+	}	
+	$event->account = substr($message,13,4);
+	$z = substr($message,17,1);
+	switch ($z) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			$event->zone = $z;
+			break;
+		default:
+			//no other zones are in the db
+			return null;
+	}
+	$e = substr($message,18,1);
+	switch ($e){
+		case 1:
+		case 2:
+			$event->status = $e;
+			break;
+		default:
+			
+			//for testing put event in dead mode
+			switch ($event->zone){
+				case 1:
+					$event->zone = "A";
+				case 2:
+					$event->zone = "B";
+				case 3:
+					$event->zone = "C";
+				default:
+					return null;
+			}
+	}
+		
+	return $event;
 }
 
 
@@ -187,9 +285,6 @@ function checksum($hex){
 	if (strlen($hex) != LONGMESSAGELEN * 2) {
 		echo "inproper length: " . strlen($hex) . "\n";
 		return false;
-	}
-	for ($i=0;$i<strlen($hex);$i = $i+2){
-		echo $hex[$i] . $hex[$i +1] ." ";
 	}
 	//calculate checksum from data
 	$csum = 0;
@@ -223,5 +318,143 @@ function strToHex($string){
         $hex .= substr('0'.$hexCode, -2);
     }
     return strToUpper($hex);
+}
+
+//--------------------------------------------------------------------//
+/*			DATABASE FUNCTIONS			     */
+//--------------------------------------------------------------------//
+
+function insertEvents() {
+	global $eventQueue;
+	global $db;
+	if ($db == null) {
+		//TODO handle error cases
+		connectDB();
+	}
+	//assuming db is no longer nil
+	while(!$eventQueue->isEmpty()){
+		$event = $eventQueue->dequeue();
+		$panel = queryEvent($event);
+		echo $panel->String() . "\n";
+		//TODO make the panel timestamp real
+		//If the panel has no timestamp it is not in the DB yet
+		if ($panel->timestamp == ""){
+			//addToDB
+			$panel = defaultPanel($event->account);
+			$panel = updatePanel($panel,$event);
+			insertPanelDB($panel);
+			echo "New Panel";
+		}
+		//The event is newer than what is in the DB so add it 
+		else if ($event->timestamp->getTimestamp() > date_create($panel->timestamp)->getTimestamp()){
+			$panel = updatePanel($panel,$event);
+			updatePanelDB($panel);
+			//updateDB
+			echo "New Event";
+		}
+		//The event timestamp <= whats in the DB its old and is ignored 
+		else {
+			echo "OLD EVENT";
+		}
+	}
+	
+}
+
+//construct a new panel in the off state
+function defaultPanel($account){
+	$panel = new Panel();
+	$panel->account = $account;
+	$panel->az = "1";
+	$panel->as = "1";
+	$panel->sz = "2";
+	$panel->ss = "1";
+	$panel->tz = "3";
+	$panel->ts = "1";
+	$panel->pz = "4";
+	$panel->ps = "1";
+	$panel->message = "NEW PANEL";
+	return $panel;
+}
+
+function updatePanel($panel, $event) {
+	//update timestamp will have to be distributed later
+	$panel->timestamp = $event->timestamp->format(DateTime::RFC2822);
+	switch ($event->zone){
+		case "1":
+		case "A":
+			$panel->az = $event->zone;
+			$panel->as = $event->status;
+		case "2":
+		case "B":
+			$panel->sz = $event->zone;
+			$panel->ss = $event->status;
+		case "3":
+		case "C":
+			$panel->tz = $event->zone;
+			$panel->ts = $event->status;
+		case "4":
+			$panel->pz = $event->zone;
+			$panel->ps = $event->status;
+		default:
+	}
+	return $panel;
+}
+
+function queryEvent($event) {
+	global $db;
+	$stmt = $db->prepare("
+	SELECT *
+	From Event
+	Where account = ?");
+	$stmt->bind_param("i", $event->account);
+	$panel = new Panel();
+	$stmt->bind_result($panel->account, $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message);
+	$stmt->execute();
+	$result = $stmt->fetch();
+	return $panel;
+}
+
+function connectDB(){
+        $server = '127.0.0.1';
+	$user = 'root';
+	$pass = 'iwicbV15';
+        $dbname = 'Gibil';
+        
+        global $db;
+		$db = new mysqli($server, $user, $pass, $dbname);
+		if (!mysqli_connect_errno()) {
+			echo "db connected\n";
+        }
+
+        if (mysqli_connect_errno()) {
+			printf("Connect failed: %s\n", mysqli_connect_error());
+			exit();
+        }
+}
+function insertPanelDB($panel){
+    global $db;
+	
+$stmt = $db->prepare("INSERT INTO Event (account,alarmzone,alarmstate,supervisoryzone,supervisorystate,troublezone,troublestate,powerzone,powerstate,timestamp,message) Values (?,?,?,?,?,?,?,?,?,?,?)");
+    $stmt->bind_param("issssssssss", $panel->account, $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message);
+    $stmt->execute();
+    if($stmt->error) {
+        printf("<b>Error: %s. </b>\n", $stmt->error);
+        return $stmt->error;
+    } else {
+        return 0;
+    }
+}
+function updatePanelDB($panel){
+    global $db;
+	
+$stmt = $db->prepare("update Event set alarmzone=?, alarmstate=?, supervisoryzone=?, supervisorystate=?, troublezone=?, troublestate=?, powerzone=?, powerstate=?, timestamp=?, message=? where account=?");
+    $stmt->bind_param("ssssssssssi", $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message,$panel->account);
+    $stmt->execute();
+    if($stmt->error) {
+        printf("<b>Error: %s. </b>\n", $stmt->error);
+        return $stmt->error;
+    } else {
+        return 0;
+    }
 }
 ?>
