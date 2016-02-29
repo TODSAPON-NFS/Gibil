@@ -20,20 +20,42 @@ class Event {
 }
 
 class Panel {
-	public $account;
-	public $az;
-	public $as;
-	public $sz;
-	public $ss;
-	public $tz;
-	public $ts;
-	public $pz;
-	public $ps;
-	public $timestamp;
-	public $message;
+	public $account;	//account number
+	public $az;		//alarm zone
+	public $as;		//alarm status
+	public $at;		//alarm timestamp
+	public $sz;		//supervisory zone
+	public $ss;		//supervisory status
+	public $st;		//supervisory timestamp
+	public $tz;		//trouble zone
+	public $ts;		//trouble status
+	public $tt;		//trouble timestamp
+	public $pz;		//power zone
+	public $ps;		//power status
+	public $pt;		//power timestamp
+	public $timestamp;	//most recent timestamp
+	public $message;	//message for aux usage
 	
 	function String() {
-		return sprintf("[account :%s az :%s as :%s sz :%s ss :%s tz :%s ts :%s pz :%s ps :%s timestamp :%s message %s]",$this->account, $this->az, $this->as, $this->sz, $this->ss, $this->tz, $this->ts, $this->pz, $this->ps, $this->timestamp,$this->message);
+		return sprintf("[account :%s az :%s as :%s at :%s sz :%s ss :%s st : %s tz :%s ts :%s tt :%s pz :%s ps :%s pt %s timestamp :%s message %s]",$this->account, $this->az, $this->as, $this->at, $this->sz, $this->ss, $this->st, $this->tz, $this->ts, $this->tt, $this->pz, $this->ps, $this->pt, $this->timestamp,$this->message);
+	}
+
+	function getZoneTimestamp($zone){
+		switch ($zone){
+			case "1":
+			case "A":
+				return $this->at;
+			case "2":
+			case "B":
+				return $this->st;
+			case "3":
+			case "C":
+				return $this->tt;
+			case "4":
+			case "D":
+				return $this->pt;
+		}
+		return "";
 	}
 }
 
@@ -346,7 +368,7 @@ function insertEvents() {
 			echo "New Panel";
 		}
 		//The event is newer than what is in the DB so add it 
-		else if ($event->timestamp->getTimestamp() > date_create($panel->timestamp)->getTimestamp()){
+		else if ($event->timestamp->getTimestamp() > date_create($panel->getZoneTimestamp($event->zone))->getTimestamp()){
 			$panel = updatePanel($panel,$event);
 			updatePanelDB($panel);
 			//updateDB
@@ -373,6 +395,7 @@ function defaultPanel($account){
 	$panel->pz = "4";
 	$panel->ps = "1";
 	$panel->message = "NEW PANEL";
+	//no timestamps in the default
 	return $panel;
 }
 
@@ -384,17 +407,21 @@ function updatePanel($panel, $event) {
 		case "A":
 			$panel->az = $event->zone;
 			$panel->as = $event->status;
+			$panel->at = $panel->timestamp;
 		case "2":
 		case "B":
 			$panel->sz = $event->zone;
 			$panel->ss = $event->status;
+			$panel->st = $panel->timestamp;
 		case "3":
 		case "C":
 			$panel->tz = $event->zone;
 			$panel->ts = $event->status;
+			$panel->tt = $panel->timestamp;
 		case "4":
 			$panel->pz = $event->zone;
 			$panel->ps = $event->status;
+			$panel->pt = $panel->timestamp;
 		default:
 	}
 	return $panel;
@@ -408,7 +435,7 @@ function queryEvent($event) {
 	Where account = ?");
 	$stmt->bind_param("i", $event->account);
 	$panel = new Panel();
-	$stmt->bind_result($panel->account, $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message);
+	$stmt->bind_result($panel->account, $panel->az, $panel->as, $panel->at, $panel->sz, $panel->ss, $panel->st, $panel->tz, $panel->ts, $panel->tt ,$panel->pz, $panel->ps, $panel->pt, $panel->timestamp,$panel->message);
 	$stmt->execute();
 	$result = $stmt->fetch();
 	return $panel;
@@ -434,8 +461,8 @@ function connectDB(){
 function insertPanelDB($panel){
     global $db;
 	
-$stmt = $db->prepare("INSERT INTO Event (account,alarmzone,alarmstate,supervisoryzone,supervisorystate,troublezone,troublestate,powerzone,powerstate,timestamp,message) Values (?,?,?,?,?,?,?,?,?,?,?)");
-    $stmt->bind_param("issssssssss", $panel->account, $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message);
+$stmt = $db->prepare("INSERT INTO Event (account,alarmzone,alarmstate,alarmtimestamp,supervisoryzone,supervisorystate,supervisorytimestamp,troublezone,troublestate,troubletimestamp,powerzone,powerstate,powertimestamp,timestamp,message) Values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    $stmt->bind_param("issssssssssssss", $panel->account, $panel->az, $panel->as, $panel->at, $panel->sz, $panel->ss, $panel->st, $panel->tz, $panel->ts, $panel->tt, $panel->pz, $panel->ps, $panel->pt, $panel->timestamp,$panel->message);
     $stmt->execute();
     if($stmt->error) {
         printf("<b>Error: %s. </b>\n", $stmt->error);
@@ -447,8 +474,8 @@ $stmt = $db->prepare("INSERT INTO Event (account,alarmzone,alarmstate,supervisor
 function updatePanelDB($panel){
     global $db;
 	
-$stmt = $db->prepare("update Event set alarmzone=?, alarmstate=?, supervisoryzone=?, supervisorystate=?, troublezone=?, troublestate=?, powerzone=?, powerstate=?, timestamp=?, message=? where account=?");
-    $stmt->bind_param("ssssssssssi", $panel->az, $panel->as, $panel->sz, $panel->ss, $panel->tz, $panel->ts, $panel->pz, $panel->ps, $panel->timestamp,$panel->message,$panel->account);
+$stmt = $db->prepare("update Event set alarmzone=?, alarmstate=?, alarmtimestamp=?, supervisoryzone=?, supervisorystate=?, supervisorytimestamp=?, troublezone=?, troublestate=?, troubletimestamp=?, powerzone=?, powerstate=?, powertimestamp=?, timestamp=?, message=? where account=?");
+    $stmt->bind_param("ssssssssssssssi", $panel->az, $panel->as, $panel->at, $panel->sz, $panel->ss, $panel->st, $panel->tz, $panel->ts, $panel->tt, $panel->pz, $panel->ps, $panel->pt, $panel->timestamp,$panel->message,$panel->account);
     $stmt->execute();
     if($stmt->error) {
         printf("<b>Error: %s. </b>\n", $stmt->error);
