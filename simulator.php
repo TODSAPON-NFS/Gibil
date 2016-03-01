@@ -3,7 +3,7 @@
 $db = NULL;
 $categories = 8;
 //probability that the alarm will cause an error // used to normalize the events to create a more realistic enviornment
-$alarmProb = 2;
+$alarmProb = 5; //probability 1 / alarmProm
 $accountsPerGroup = 100;
 $groups = 4;
 $groupGap = 1000;
@@ -188,6 +188,7 @@ function simulateEvents(){
 			$panel->pz = $stats["power"]["zone"][0];
 			$panel->ps = $stats["power"]["state"][alarm()];
 			$panel->pt = date(DATE_RFC2822);
+			$panel->timestamp = date(DATE_RFC2822);
 			$account = $startingAccount + (rand(0, $groups) * $groupGap) + rand(0, $accountsPerGroup);
 			updatePanelDB($panel);
 		}

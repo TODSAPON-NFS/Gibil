@@ -4,8 +4,31 @@ var YELLOW = '#EFB77A';
 var BLUE = '#08D3E1';
 var AMBER = '#FFFF88';
 
-var GrayLevel = 50;
+var GrayLevel = 40;
+
+//Slider for Gray level
+//TODO probably delete in the end
 //Javascript User interface functions
+var slider = document.getElementById("graySlider");
+
+
+var grayDiv = document.getElementById("grayDiv");
+grayDiv.innerHTML = GrayLevel;
+
+//function is called when slider value changes
+slider.addEventListener("change", function() { 
+  GrayLevel = slider.value;  
+  grayDiv.innerHTML = GrayLevel;
+})
+
+
+//if you want it real-time, you can do this: 
+setInterval(function() {
+  GrayLevel = slider.value;
+  grayDiv.innerHTML = GrayLevel;
+}, 100)
+
+//end slider TODO end delete
 
 function update(panel) {
     
@@ -14,6 +37,7 @@ function update(panel) {
     document.getElementById( panel["account"] + "-status").innerHTML = "status: "+ panel["message"];
     
     //set all elements to default values
+    var idBox = document.getElementById( panel["account"] + "-idBox")
     var aBox = document.getElementById( panel["account"] + "-alarm")
     aBox.innerHTML = 'A';
     var tBox = document.getElementById( panel["account"] + "-trouble")
@@ -22,6 +46,20 @@ function update(panel) {
     sBox.innerHTML = 'S';
     var pBox = document.getElementById( panel["account"] + "-power")
     pBox.innerHTML = 'P';
+
+		var timestamp = new Date(panel["timestamp"]);
+		var dayAgo = new Date();
+
+		//TODO 15 second diff ( eventually 24h )
+		dayAgo.setSeconds(dayAgo.getSeconds() - 60*60*24);
+
+		if (timestamp > dayAgo){
+			idBox.style.backgroundColor = GREEN;
+		} else {
+        		idBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
+		}
+
+	//idbox // go gray if the last message was > 24h
 	//alarm
 	switch (panel["alarmzone"]){
 	case "1":
@@ -120,6 +158,15 @@ function update(panel) {
 	}
 }
 
+//change id recursively  
+  function changeId(nodes, n){
+   for (var i=0;i<nodes.length;i=i+1){
+     if (nodes[i].childNodes){
+           changeId(nodes[i].childNodes,n);
+     }
+      nodes[i].id =  String(n) + nodes[i].id;
+   }
+  }
 
 //update recent updates the DIV acordian recent with sections based on recent events.
 //Precondition : The panes passed to update recent are in sorted order
@@ -132,9 +179,12 @@ function updateRecent(panels) {
 		
 		//clone the panel being examined
 		var clone = original.cloneNode(true);
-		clone.id = original.id + "-recent";
+		clone.id = "recent-" + original.id;
+		//rename children
+		children = clone.childNodes;
+		changeId(children,"recent-");
 
-	original.clone(false).find("*[id]").andSelf().each(function() { $(this).attr("id", $(this).attr("id") + "_cloned"); });
+		//var clone = $("#"+panel["account"] + "-box").clone(false).find("*[id]").andSelf().each(function() { $(this).attr("id", $(this).attr("id") + "_cloned"); });		
 		
 		//collect status
 		var alarmStatus = document.getElementById(panel["account"] + "-alarm").style.backgroundColor;
@@ -151,7 +201,8 @@ function updateRecent(panels) {
 		breakPointTime.setSeconds(breakPointTime.getSeconds() - 15);
 		
 		//remove panels that have been set to green
-		if ( alarmStatus == GREEN && tamperStatus == GREEN && supervisorStatus == GREEN && powerStatus == GREEN) {
+		var green = tinycolor(GREEN).toRgbString();
+		if ( alarmStatus == green && tamperStatus == green && supervisorStatus == green && powerStatus == green) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it
 			if(newlyOkPanel != null){
@@ -195,36 +246,6 @@ function updateRecent(panels) {
 	}
 }
 
-function blueTheme() {
-/*
-	//LOGO missing
-
-	//LOGO Header missing
-
-	//Background
-	var body = document.querySelector("#body");
-	body.classList.add("bluebody")
-	
-	//wrapper or tab border color
-	var wrapper = document.querySelector(".wrapper");
-	wrapper.classList.add("bluewrapper")
-
-	//tab-content-background color
-	var tab = document.querySelectorAll(".tab-content");
-	for(var i =0; i< tab.length;i++){
-		tab[i].style.backgroundColor = "#042029";
-	}
-
-	//tab-links
-	var tablinks = document.querySelectorAll(".tab-links");
-	for(var i =0; i< tablinks.length;i++){
-		tablinks[i].style.backgroundColor = "#042029";
-		tablinks[i].style.color = "#9EA69D";
-	}
-	
-*/
-
-}
 
 $(document).ready(function() {
 

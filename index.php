@@ -4,9 +4,9 @@
     <link href='styles/styles.css' rel='stylesheet' type='text/css' >
     <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'> <!-- Add this to the head of your html before the styles-->
 
-    <button onclick="blueTheme()">Blue</button>
-    <button onclick="blackTheme()">Black</button>
-    <button onclick="whiteTheme()">White</button>
+	<h2>Grayout Level</h2>
+	<input type='range' min='0' max='100' value='50' id='graySlider'></input>
+	<div id='grayDiv' style='margin-top:2em;'></div>
 </head>
 
  <body onload="updateListener()" id="body"> 
