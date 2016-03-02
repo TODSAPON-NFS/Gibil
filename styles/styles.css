@@ -5,7 +5,8 @@
 body {
     font-family: 'Ubuntu', sans-serif;
     padding: 30px;
-    background-color: #ededed;
+    background-color: 171814;
+    color:49473a;
 }
 	
 
@@ -36,11 +37,11 @@ body {
 	}
 
 	.tab-links a {
-		background:#d4d4d4;
-        border: 1px solid #ccc;
+		background:#3d3d3d;
+        border: 1px solid #50504e;
 		border-radius:3px 3px 0px 0px;
         border-bottom:0;
-		color:#999;
+		color:#787d76;
 		display:inline-block;
 		font-size:16px;
 		font-weight:600px;
@@ -56,9 +57,9 @@ body {
     */
 
 	li.active a {
-		background:#FFF;
-		color:#373737;
-        border: 1px solid #ccc;
+		background:#272822;
+		color:#6f6a57;
+        border: 1px solid #33342e;
 		border-radius:3px 3px 0px 0px;
         border-bottom:0;
         position:relative;
@@ -68,10 +69,10 @@ body {
 	/*-----------Contents of Tabs -----------------*/
 
 	.tab-content {
-		background:#FFF;
-        border: 1px solid #ccc;
+		background:#272822;
+        border: 1px solid #33342e;
 		border-radius:3px 3px 0px 0px;
-		color:#373737;
+		color:#49473a;
 		padding:15px;
 	}
 		
@@ -98,8 +99,8 @@ h1 {
   }
 
  .eventBox .content {
-    background: #ededed;
-    border: 1px solid #ccc;
+    background: #171814;
+    border: 1px solid #49473a;
     border-radius: 5px;
     margin: 3px auto;
     padding: 2px;
@@ -111,25 +112,29 @@ h1 {
 
 .idBox {
     background:#FFF;
-    border: 1px solid #E2E2E2;
+    border: 1px solid #33342e;
     border-radius: 5px;
-    height: 15px;
+    height: 17px;
     float :left;
     position: relative;
     margin-bottom: 15px;
+    text-align: center;
     width: 45px;
+    vertical-align:middle;
 }
 
 .statusBox {
     background:#FFF;
-    border: 1px solid #E2E2E2;
+    border: 1px solid #33342e;
     border-radius: 5px;
+    color: #6f6a57;
     float :left;
-    height: 15px;
+    height: 17px;
     position: relative;
     margin-bottom: 15px;
     text-align: center;
     width: 30px;
+    vertical-align:middle;
 }
 
 .statusBox .A1-alarm {
