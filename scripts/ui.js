@@ -1,50 +1,39 @@
+var GREENORIG = '#BCF1AB'; //This should really change I dont really like it
+var REDORIG = '#FA0012'; //This should really change I dont really like it
+var YELLOWORIG = '#EFB77A';
+var BLUEORIG = '#08D3E1';
+var AMBERORIG = '#FFFF88';
+
+
 var GREEN = '#BCF1AB'; //This should really change I dont really like it
 var RED = '#FA0012'; //This should really change I dont really like it
 var YELLOW = '#EFB77A';
 var BLUE = '#08D3E1';
 var AMBER = '#FFFF88';
 
-var GrayLevel = 40;
 
-//Slider for Gray level
-//TODO probably delete in the end
-//Javascript User interface functions
-var slider = document.getElementById("graySlider");
+function update(panel, id) {
 
-
-var grayDiv = document.getElementById("grayDiv");
-grayDiv.innerHTML = GrayLevel;
-
-//function is called when slider value changes
-slider.addEventListener("change", function() { 
-  GrayLevel = slider.value;  
-  grayDiv.innerHTML = GrayLevel;
-})
-
-
-//if you want it real-time, you can do this: 
-setInterval(function() {
-  GrayLevel = slider.value;
-  grayDiv.innerHTML = GrayLevel;
-}, 100)
-
-//end slider TODO end delete
-
-function update(panel) {
-    
+	//adjust colors
+	GREEN = tinycolor(GREENORIG).darken(DarkLevel).toHexString();
+	RED = tinycolor(REDORIG).darken(DarkLevel).toHexString();
+	YELLOW = tinycolor(YELLOWORIG).darken(DarkLevel).toHexString();
+	BLUE = tinycolor(BLUEORIG).darken(DarkLevel).toHexString();
+	AMBER = tinycolor(AMBERORIG).darken(DarkLevel).toHexString();
+	    
     //update the date and status
-    document.getElementById( panel["account"] + "-date").innerHTML = "time: "+ panel["timestamp"];
-    document.getElementById( panel["account"] + "-status").innerHTML = "status: "+ panel["message"];
+    document.getElementById( id + "-date").innerHTML = panel["timestamp"];
+    document.getElementById( id + "-status").innerHTML = "status: "+ panel["message"];
     
     //set all elements to default values
-    var idBox = document.getElementById( panel["account"] + "-idBox")
-    var aBox = document.getElementById( panel["account"] + "-alarm")
+    var idBox = document.getElementById( id + "-idBox")
+    var aBox = document.getElementById( id + "-alarm")
     aBox.innerHTML = 'A';
-    var tBox = document.getElementById( panel["account"] + "-trouble")
+    var tBox = document.getElementById( id + "-trouble")
     tBox.innerHTML = 'T';
-    var sBox = document.getElementById( panel["account"] + "-supervisory")
+    var sBox = document.getElementById( id + "-supervisory")
     sBox.innerHTML = 'S';
-    var pBox = document.getElementById( panel["account"] + "-power")
+    var pBox = document.getElementById( id + "-power")
     pBox.innerHTML = 'P';
 
 		var timestamp = new Date(panel["timestamp"]);
@@ -184,6 +173,7 @@ function updateRecent(panels) {
 		children = clone.childNodes;
 		changeId(children,"recent-");
 
+
 		//var clone = $("#"+panel["account"] + "-box").clone(false).find("*[id]").andSelf().each(function() { $(this).attr("id", $(this).attr("id") + "_cloned"); });		
 		
 		//collect status
@@ -198,7 +188,10 @@ function updateRecent(panels) {
 		var breakPointTime = new Date();
 
 		//TODO 15 second diff ( eventually 24h )
-		breakPointTime.setSeconds(breakPointTime.getSeconds() - 15);
+		breakPointTime.setSeconds(breakPointTime.getSeconds() - timeSeparator);
+		//update event display
+		document.getElementById("since").innerHTML = "Events in the last : " + seperatorString;
+		document.getElementById("after").innerHTML = "Outstanding Since : "+ breakPointTime.toString() ;
 		
 		//remove panels that have been set to green
 		var green = tinycolor(GREEN).toRgbString();
@@ -242,9 +235,10 @@ function updateRecent(panels) {
 					}
 				}
 			}
+		update(panel,"recent-" + panel["account"]);
 		}
-	}
-}
+	}//end for
+}//end updaterecent
 
 
 $(document).ready(function() {

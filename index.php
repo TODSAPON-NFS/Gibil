@@ -5,8 +5,15 @@
     <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'> <!-- Add this to the head of your html before the styles-->
 
 	<h2>Grayout Level</h2>
-	<input type='range' min='0' max='100' value='50' id='graySlider'></input>
-	<div id='grayDiv' style='margin-top:2em;'></div>
+	<div id='graySlideContainer' width='700' style="padding-bottom:50px">
+		<input type='range' min='0' max='100' value='50' id='graySlider' style='float:left'></input>
+		<div id='grayVal' style='float:left'></div>
+	</div>
+	<h2>Darkness Level</h2>
+	<div id='darkSlideContainer' width='700' style="padding-bottom:50px">
+		<input type='range' min='0' max='100' value='10' id='darkSlider' style='float:left'></input>
+		<div id='darkVal' style='float:left'></div>
+	</div>
 </head>
 
  <body onload="updateListener()" id="body"> 
@@ -70,11 +77,17 @@ function initalizeAccounts() {
 		<div class="tab-content">
 			
 			<div id="tabrecent" class="tab active">
+				<div id="buttonContainer">
+					<button onclick="setRecentTime('min')">Min</button> 
+					<button onclick="setRecentTime('hour')">Hour</button> 
+					<button onclick="setRecentTime('day')">Day</button> 
+					<button onclick="setRecentTime('week')">Week</button> 
+				</div>
 
 			   <div class="acordian" id="acordian recent">
-			   <br><h1> < 24 </h1><br>
+			   <h1 id="since"></h1>
 				   <div class = "recent clearfix" id="new"></div> <!-- clarfix -->
-			   <br><h1> > 24 </h1><br>
+			   <h1 id="after"></h1>
 				   <div class = "recent clearfix" id="old"></div> <!-- clarfix -->
 			   </div> <!-- acordian -->
 			</div> <!-- tabrecent -->
@@ -95,6 +108,7 @@ function initalizeAccounts() {
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="scripts/rpc.js"></script>
+<script type="text/javascript" src="scripts/interact.js"></script>
 <script type="text/javascript" src="scripts/ui.js"></script>
 <script type='text/javascript' src='scripts/tinycolor.js'></script>
 </body>
