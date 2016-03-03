@@ -84,7 +84,7 @@ function initalizeAccounts() {
 					<button onclick="setRecentTime('week')">Week</button> 
 				</div>
 
-			   <div class="acordian" id="acordian recent">
+			   <div class="acordian" id="acordian recent" >
 			   <h1 id="since"></h1>
 				   <div class = "recent clearfix" id="new"></div> <!-- clarfix -->
 			   <h1 id="after"></h1>
