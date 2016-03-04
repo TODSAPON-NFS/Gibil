@@ -1,14 +1,10 @@
-var GREEN = 'rgba(179,255,204,.6)';
+var GREEN = 'rgba(179,255,204,.0)';
 var AMBER = '#F39720'; //This should really change I dont really like it
 var YELLOW = '#e1e37b';
 var BLUE = '#62d9f4';
 var RED = '#cd2737';
 
-var GREENGRAY = '#384432'; //This should really change I dont really like it
-var AMBERGRAY = '#3b1b1b'; //This should really change I dont really like it
-var YELLOWGRAY = '#3f4129';
-var BLUEGRAY = '#263f41';
-var REDGRAY = '#433116';
+var DEFAULTTEXTCOLOR = '#6f6a57'
 
 
 function update(panel, id) {
@@ -38,10 +34,12 @@ function update(panel, id) {
 		switch (panel["alarmstate"]){
 		case "1":
         		aBox.innerHTML = 'A';
+        		aBox.style.color = DEFAULTTEXTCOLOR;
         		aBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
         		aBox.innerHTML = 'A';
+        		aBox.style.color = tinycolor(RED).darken(40).toRgbString();
         		aBox.style.backgroundColor = RED;
 			break;
 		}
@@ -50,11 +48,13 @@ function update(panel, id) {
 		switch (panel["alarmstate"]){
 		case "1":
         		aBox.innerHTML = 'A';
-        		aBox.style.backgroundColor = GREENGRAY
+        		aBox.style.color = DEFAULTTEXTCOLOR;
+        		aBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
 			break;
 		case "2":
         		aBox.innerHTML = 'A';
-        		aBox.style.backgroundColor = REDGRAY
+        		aBox.style.color = tinycolor(RED).darken(40).toRgbString();
+        		aBox.style.backgroundColor = tinycolor(RED).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
@@ -65,10 +65,12 @@ function update(panel, id) {
 		switch (panel["troublestate"]){
 		case "1":
         		tBox.innerHTML = 'T';
+        		tBox.style.color = DEFAULTTEXTCOLOR;
         		tBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
         		tBox.innerHTML = 'T';
+        		tBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
         		tBox.style.backgroundColor = YELLOW;
 			break;
 		}
@@ -77,11 +79,13 @@ function update(panel, id) {
 		switch (panel["troublestate"]){
 		case "1":
         		tBox.innerHTML = 'T';
-        		tBox.style.backgroundColor = GREEN;
+        		tBox.style.color = DEFAULTTEXTCOLOR;
+        		tBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
 			break;
 		case "2":
         		tBox.innerHTML = 'T';
-        		tBox.style.backgroundColor = YELLOWGRAY
+        		tBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
+        		tBox.style.backgroundColor = tinycolor(YELLOW).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
@@ -92,10 +96,12 @@ function update(panel, id) {
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
+        		sBox.style.color = DEFAULTTEXTCOLOR;
         		sBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
         		sBox.innerHTML = 'S';
+        		sBox.style.color = tinycolor(BLUE).darken(40).toRgbString();
         		sBox.style.backgroundColor = BLUE;
 			break;
 		}
@@ -104,11 +110,13 @@ function update(panel, id) {
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
-        		sBox.style.backgroundColor = GREENGRAY
+        		sBox.style.color = DEFAULTTEXTCOLOR;
+        		sBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
 			break;
 		case "2":
         		sBox.innerHTML = 'S';
-        		sBox.style.backgroundColor = YELLOWGRAY
+        		sBox.style.color = tinycolor(BLUE).darken(40).toRgbString();
+        		sBox.style.backgroundColor = tinycolor(BLUE).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
@@ -119,10 +127,12 @@ function update(panel, id) {
 		switch (panel["powerstate"]){
 		case "1":
         		pBox.innerHTML = 'P';
+        		pBox.style.color = DEFAULTTEXTCOLOR;
         		pBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
         		pBox.innerHTML = 'P';
+        		pBox.style.color = tinycolor(AMBER).darken(40).toRgbString();
         		pBox.style.backgroundColor = AMBER;
 			break;
 		}
