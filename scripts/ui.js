@@ -1,26 +1,18 @@
-var GREENORIG = '#BCF1AB'; //This should really change I dont really like it
-var REDORIG = '#FA0012'; //This should really change I dont really like it
-var YELLOWORIG = '#EFB77A';
-var BLUEORIG = '#08D3E1';
-var AMBERORIG = '#FFFF88';
+var GREEN = 'rgba(179,255,204,.6)';
+var AMBER = '#F39720'; //This should really change I dont really like it
+var YELLOW = '#e1e37b';
+var BLUE = '#62d9f4';
+var RED = '#cd2737';
 
-
-var GREEN = '#BCF1AB'; //This should really change I dont really like it
-var RED = '#FA0012'; //This should really change I dont really like it
-var YELLOW = '#EFB77A';
-var BLUE = '#08D3E1';
-var AMBER = '#FFFF88';
+var GREENGRAY = '#384432'; //This should really change I dont really like it
+var AMBERGRAY = '#3b1b1b'; //This should really change I dont really like it
+var YELLOWGRAY = '#3f4129';
+var BLUEGRAY = '#263f41';
+var REDGRAY = '#433116';
 
 
 function update(panel, id) {
 
-	//adjust colors
-	GREEN = tinycolor(GREENORIG).darken(DarkLevel).toHexString();
-	RED = tinycolor(REDORIG).darken(DarkLevel).toHexString();
-	YELLOW = tinycolor(YELLOWORIG).darken(DarkLevel).toHexString();
-	BLUE = tinycolor(BLUEORIG).darken(DarkLevel).toHexString();
-	AMBER = tinycolor(AMBERORIG).darken(DarkLevel).toHexString();
-	    
     //update the date and status
     document.getElementById( id + "-date").innerHTML = panel["timestamp"];
     document.getElementById( id + "-status").innerHTML = "status: "+ panel["message"];
@@ -36,17 +28,8 @@ function update(panel, id) {
     var pBox = document.getElementById( id + "-power")
     pBox.innerHTML = 'P';
 
-		var timestamp = new Date(panel["timestamp"]);
-		var dayAgo = new Date();
+	idBox.style.backgroundColor = GREEN;
 
-		//TODO 15 second diff ( eventually 24h )
-		dayAgo.setSeconds(dayAgo.getSeconds() - 60*60*24);
-
-		if (timestamp > dayAgo){
-			idBox.style.backgroundColor = GREEN;
-		} else {
-        		idBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
-		}
 
 	//idbox // go gray if the last message was > 24h
 	//alarm
@@ -67,11 +50,11 @@ function update(panel, id) {
 		switch (panel["alarmstate"]){
 		case "1":
         		aBox.innerHTML = 'A';
-        		aBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
+        		aBox.style.backgroundColor = GREENGRAY
 			break;
 		case "2":
         		aBox.innerHTML = 'A';
-        		aBox.style.backgroundColor = tinycolor(RED).desaturate(GrayLevel).toHexString();
+        		aBox.style.backgroundColor = REDGRAY
 			break;
 		}
 		break;
@@ -98,7 +81,7 @@ function update(panel, id) {
 			break;
 		case "2":
         		tBox.innerHTML = 'T';
-        		tBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
+        		tBox.style.backgroundColor = YELLOWGRAY
 			break;
 		}
 		break;
@@ -121,11 +104,11 @@ function update(panel, id) {
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
-        		sBox.style.backgroundColor = tinycolor(GREEN).desaturate(GrayLevel).toHexString();
+        		sBox.style.backgroundColor = GREENGRAY
 			break;
 		case "2":
         		sBox.innerHTML = 'S';
-        		sBox.style.backgroundColor = tinycolor(YELLOW).desaturate(GrayLevel).toHexString();
+        		sBox.style.backgroundColor = YELLOWGRAY
 			break;
 		}
 		break;
@@ -194,7 +177,7 @@ function updateRecent(panels) {
 		document.getElementById("after").innerHTML = "Outstanding Since : "+ breakPointTime.toString() ;
 		
 		//remove panels that have been set to green
-		var green = tinycolor(GREEN).toRgbString();
+		var green = GREEN;
 		if ( alarmStatus == green && tamperStatus == green && supervisorStatus == green && powerStatus == green) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it
