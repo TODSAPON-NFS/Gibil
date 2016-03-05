@@ -188,7 +188,6 @@ function updateRecent(panels) {
 		
 		//remove panels that have been set to green
 		var green = GREEN;
-		console.log(green + alarmStatus);
 		if ( alarmStatus == green && tamperStatus == green && supervisorStatus == green && powerStatus == green) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it

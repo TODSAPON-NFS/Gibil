@@ -1,5 +1,7 @@
 //Javascript for preforming remote procedure calls
 
+var localPanels;
+
 function updateListener(){
     getUpdate()
     window.setTimeout(updateListener, 1000)
@@ -28,7 +30,9 @@ function updatePanels(responseText) {
     for (i =0;i< panels.length;i++){
         update(panels[i],panels[i]["account"]);
     }
-    updateRecent(panels)	
+    updateRecent(panels);
+    //update the locally held version of the panels	
+    localPanels = panels;
     
         
 

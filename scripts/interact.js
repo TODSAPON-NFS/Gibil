@@ -1,51 +1,3 @@
-
-/*-----------GraySlider------------------*/
-var GrayLevel = 50;
-slider = document.getElementById("graySlider");
-
-
-var grayDiv = document.getElementById("grayVal");
-grayDiv.innerHTML = GrayLevel;
-
-//function is called when slider value changes
-slider.addEventListener("change", function() { 
-  GrayLevel = slider.value;  
-  grayDiv.innerHTML = GrayLevel;
-})
-
-
-//if you want it real-time, you can do this: 
-setInterval(function() {
-  GrayLevel = slider.value;
-  grayDiv.innerHTML = GrayLevel;
-}, 100)
-/*-----------/GraySlider------------------*/
-
-/*-----------DarkSlider------------------*/
-var DarkLevel = 10;
-darkSlider = document.getElementById("darkSlider");
-
-
-var darkDiv = document.getElementById("darkVal");
-darkDiv.innerHTML = DarkLevel;
-
-//function is called when darkSlider value changes
-darkSlider.addEventListener("mod", function() { 
-  DarkLevel = darkSlider.value;  
-  darkDiv.innerHTML = DarkLevel;
-})
-
-
-//if you want it real-time, you can do this: 
-setInterval(function() {
-  DarkLevel = darkSlider.value;
-  darkDiv.innerHTML = DarkLevel;
-}, 100)
-/*-----------/GraySlider------------------*/
-
-//end slider TODO end delete
-
-
 /*-------TIME BUTTONS---------------------*/
 
 var MIN = 60
@@ -81,4 +33,6 @@ function setRecentTime(breakPoint){
 		timeSeparator = DAY;
 		break;
 	}
+	//update the display based on local panels
+	updateRecent(localPanels);
 }
