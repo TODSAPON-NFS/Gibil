@@ -1,4 +1,4 @@
-var GREEN = 'rgba(179,255,204,.0)';
+var GREEN = 'rgba(179, 255, 204, 0)';
 var AMBER = '#F39720'; //This should really change I dont really like it
 var YELLOW = '#e1e37b';
 var BLUE = '#62d9f4';
@@ -188,6 +188,7 @@ function updateRecent(panels) {
 		
 		//remove panels that have been set to green
 		var green = GREEN;
+		console.log(green + alarmStatus);
 		if ( alarmStatus == green && tamperStatus == green && supervisorStatus == green && powerStatus == green) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it
