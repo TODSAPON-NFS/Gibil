@@ -120,7 +120,8 @@ $POLL = [
 //True if polling is happening
 $POLLING = 0;
 
-
+//True if working with the real AEU
+$PRODUCTION = false;
 while(true){
 	if(messageHandle()){
 		//do if a message was received
@@ -143,7 +144,6 @@ while(true){
 //$serial->sendMessage(ACK);
 
 //$serial->sendMessage("r4001/100\r",1);
-
 /*
 $clockReset="cw010101000000AAAAA";
 echo genchecksum($clockReset);
@@ -151,7 +151,10 @@ $clockReset = $clockReset . genchecksum($clockReset) . "\r";
 echo $clockReset;
 echo strlen($clockReset);
 $serial->sendMessage($clockReset);
+$read = $serial->readPort();
+echo $read;
 */
+
 
 
 
@@ -199,21 +202,28 @@ function pollingRoutine(){
 function messageHandle(){
 	global $serial;
 	global $eventQueue;
+	global $PRODUCTION;
+
 	$read = $serial->readPort();
 
 	switch (strlen($read)) {
 		case LONGMESSAGELEN:
+			echo $read;
 			//nack if the checksum is bad
 			if (!checksum(strToHex($read))){
 				echo "bad checksum";
-				$serial->sendMessage(NAK);
+				$serial->sendMessage(ACK);
 				return;
 			}
 			switch($read[0]){
 				case "M": 
 				case "U":
 				case "E":
-					$event = parseEventSimulator($read);
+					if ($PRODUCTION == true ) {
+						$event = parseEventProduction($read);
+					} else if ($PRODUCTION == false) {
+						$event = parseEventSimulator($read);
+					}
 					//TODO in the end no events should be null
 					if ($event != null ){
 						$eventQueue->enqueue($event);
@@ -248,6 +258,7 @@ function messageHandle(){
 				default:
 					echo "Unknown Short Response: ". $read . "\n";
 			}
+			$serial->sendMessage(ACK);
 			break;
 		case 0:
 			return false;
@@ -261,6 +272,27 @@ function messageHandle(){
 	return true;
 }
 
+
+function parseEventProduction($message){
+	$event = new Event();
+	$mon = substr($message,1,2);
+	$d = substr($message,3,2);
+	$y = substr($message,5,2);
+	$h = substr($message,7,2);
+	$min = substr($message,9,2);
+	$s = substr($message,11,2);
+
+	$datestr = "20".$y."-".$d."-".$mon." ".$h.":".$min.":".$s;
+	$event->timestamp = \DateTime::createFromFormat('Y-d-m H:i:s',$datestr);
+	if (! $event->timestamp) {
+	    echo sprintf("'%s' is not a valid date.", $datestr);
+	}	
+	$event->account = substr($message,13,4);
+	$event->zone = substr($message,17,1);
+	$event->status = substr($message,18,1);
+	return $event;
+
+}
 
 //TODO remove later this is a testing function
 function parseEventSimulator($message) {
@@ -334,7 +366,14 @@ function genchecksum($message){
 
 }
 
+	/*The message structure is assumed by the checksum method to be
+		
+		II (MM x18) CS CS CR
+	
+	in the production server the checksum is only the lowest two ascii chars of the checksum
+	in the simulator the checksum is two 8bit hex codes*/
 function checksum($hex){
+	global $PRODUCTION;
 	if (strlen($hex) != LONGMESSAGELEN * 2) {
 		echo "inproper length: " . strlen($hex) . "\n";
 		return false;
@@ -345,14 +384,22 @@ function checksum($hex){
 		$csum = $csum + (hexdec($hex[$i]) << 4) + hexdec($hex[$i+1]);
 		//echo "checksum: " . $csum . " - " . $hex[$i] . "\n";
 	}
+	echo "checksum" . dechex($csum);
 
 	//extract checksum
 	$sum = 0;
 	$index = 0;
-	for ($i=strlen($hex)-3;$i>strlen($hex)-7;$i--){
-		//echo "checksum: " . $sum . " - " . $hex[$i] . "\n";
-		$sum = $sum + (hexdec($hex[$i]) << ($index * 4) );
-		$index++;
+	
+	if($PRODUCTION == false){
+		for ($i=strlen($hex)-3;$i>strlen($hex)-7;$i--){
+			//echo "checksum: " . $sum . " - " . $hex[$i] . "\n";
+			$sum = $sum + (hexdec($hex[$i]) << ($index * 4) );
+			$index++;
+		}
+	} else if ($PRODUCTION == true) {
+		$sum = hexdec(hexToStr(array_slice($hex,strlen($hex)-7,4)));
+		$csum = $csum % 256;
+
 	}
 	if ( $csum != $sum ){
 		//echo "bad checksum: " . $sum . " =/= " .$csum."\n";
@@ -371,6 +418,14 @@ function strToHex($string){
         $hex .= substr('0'.$hexCode, -2);
     }
     return strToUpper($hex);
+}
+
+function hexToStr($hex){
+    $string='';
+    for ($i=0; $i < strlen($hex)-1; $i+=2){
+        $string .= chr(hexdec($hex[$i].$hex[$i+1]));
+    }
+    return $string;
 }
 
 //--------------------------------------------------------------------//
