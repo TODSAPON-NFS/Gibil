@@ -10,6 +10,7 @@ var DEFAULTTEXTCOLOR = '#6f6a57'
 function update(panel, id) {
 
     //update the date and status
+    console.log(id);
     document.getElementById( id + "-date").innerHTML = panel["timestamp"];
     document.getElementById( id + "-status").innerHTML = "status: "+ panel["message"];
     
@@ -29,7 +30,7 @@ function update(panel, id) {
 
 	//idbox // go gray if the last message was > 24h
 	//alarm
-	switch (panel["alarmzone"]){
+	switch (panel["alarmwirestate"]){
 	case "1":
 		switch (panel["alarmstate"]){
 		case "1":
@@ -44,7 +45,7 @@ function update(panel, id) {
 			break;
 		}
 		break;
-	case "A":
+	case "2":
 		switch (panel["alarmstate"]){
 		case "1":
         		aBox.innerHTML = 'A';
@@ -60,8 +61,8 @@ function update(panel, id) {
 		break;
 	}
 	//trouble
-	switch (panel["troublezone"]){
-	case "3":
+	switch (panel["troublewirestate"]){
+	case "1":
 		switch (panel["troublestate"]){
 		case "1":
         		tBox.innerHTML = 'T';
@@ -75,7 +76,7 @@ function update(panel, id) {
 			break;
 		}
 		break;
-	case "C":
+	case "2":
 		switch (panel["troublestate"]){
 		case "1":
         		tBox.innerHTML = 'T';
@@ -91,8 +92,8 @@ function update(panel, id) {
 		break;
 	}
 	//supervisory
-	switch (panel["supervisoryzone"]){
-	case "2":
+	switch (panel["supervisorywirestate"]){
+	case "1":
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
@@ -106,7 +107,7 @@ function update(panel, id) {
 			break;
 		}
 		break;
-	case "B":
+	case "2":
 		switch (panel["supervisorystate"]){
 		case "1":
         		sBox.innerHTML = 'S';
@@ -122,20 +123,16 @@ function update(panel, id) {
 		break;
 	}
 	//power
-	switch (panel["powerzone"]){
-	case "4":
-		switch (panel["powerstate"]){
-		case "1":
-        		pBox.innerHTML = 'P';
-        		pBox.style.color = DEFAULTTEXTCOLOR;
-        		pBox.style.backgroundColor = GREEN;
-			break;
-		case "2":
-        		pBox.innerHTML = 'P';
-        		pBox.style.color = tinycolor(AMBER).darken(40).toRgbString();
-        		pBox.style.backgroundColor = AMBER;
-			break;
-		}
+	switch (panel["powerstate"]){
+	case "1":
+		pBox.innerHTML = 'P';
+		pBox.style.color = DEFAULTTEXTCOLOR;
+		pBox.style.backgroundColor = GREEN;
+		break;
+	case "2":
+		pBox.innerHTML = 'P';
+		pBox.style.color = tinycolor(AMBER).darken(40).toRgbString();
+		pBox.style.backgroundColor = AMBER;
 		break;
 	}
 }

@@ -5,7 +5,7 @@ var HOUR = MIN * 60;
 var DAY = HOUR * 24;
 var WEEK = DAY * 7;
 
-var seperatorString = ""
+var seperatorString = "";
 var timeSeparator;
 
 setRecentTime("day"); //default
@@ -34,5 +34,7 @@ function setRecentTime(breakPoint){
 		break;
 	}
 	//update the display based on local panels
-	updateRecent(localPanels);
+	if ( localPanels != null){
+		updateRecent(localPanels);
+	}
 }
