@@ -455,9 +455,12 @@ class phpSerial
 	{
 		$this->_buffer .= $str;
 
-		if ($this->autoflush === true) $this->flush();
+		if ($this->autoflush === true) {
+			$success = $this->flush();
+		}
 
 		usleep((int) ($waitForReply * 1000000));
+		return $success;
 	}
 
 	/**
