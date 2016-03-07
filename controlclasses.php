@@ -29,7 +29,7 @@ class Event {
 		$datestr = "20".$y."-".$d."-".$mon." ".$h.":".$min.":".$s;
 		$this->timestamp = \DateTime::createFromFormat('Y-d-m H:i:s',$datestr);
 		if (! $this->timestamp) {
-		    echo sprintf("'%s' is not a valid date.", $datestr);
+		    out( sprintf("'%s' is not a valid date.", $datestr));
 		    return null;
 		}	
 		$this->account = substr($message,13,4);

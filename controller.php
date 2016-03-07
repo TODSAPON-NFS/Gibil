@@ -6,10 +6,13 @@ define ("ACK", chr(6));
 define ("NAK", chr(21));
 define ("SHORTMESSAGELEN", 2);
 define ("LONGMESSAGELEN", 22);
+
+//Timing intervals // TODO set better ones
 define ("POLLINGTIME", 5);
 define ("UPDATETIME", 15);
 define ("FIRMWARETIME", 15);
 define ("EMAILTIME", 15);
+define ("LOGFILETIME",15);
 
 
 
@@ -17,8 +20,12 @@ define ("EMAILTIME", 15);
 /*			Start Execution Here				 */
 //-----------------------------------------------------------------------//
 
+//database
 $db = NULL;
+
+//event queue holds events to be put in the DB
 $eventQueue = new SplQueue();
+//message queue holds messages to be send to the AEU
 $messageQueue = new SplQueue();
 
 // Let's start the class
@@ -34,7 +41,6 @@ $serial->confFlowControl("rts/cts");
 // We can change the baud rate
 $serial->confBaudRate(9600);
 
-
 // Then we need to open it
 $serial->deviceOpen();
 sleep(1);
@@ -42,15 +48,17 @@ sleep(1);
 
 //GLOBAL CONTROL VARIABLES
 //True if Accounts should be polled
-$messageTimer = [
+$taskTimer = [
 	"poll" => time() - POLLINGTIME,
 	"update" => time() - UPDATETIME, 
 	"firmware" => time() - FIRMWARETIME,
 	"email" => time() - EMAILTIME,
+	"log" => time() - LOGFILETIME,
 ];
 
 //True if working with the real AEU
-$PRODUCTION = true;
+$PRODUCTION = false;
+
 
 
 //used to generate polling requests
@@ -63,10 +71,13 @@ $baseAccount = 4000;
 $groups = 4;
 $groupsGap = 1000;
 
+$logfilename;
+$logfile;
+
 /*
 
 //mail functionality		
-echo "[SENDING EMAIL]\n";
+out( "[SENDING EMAIL]\n");
 $msg = "Hello Howard,
 This is an email test from the web server
 
@@ -76,9 +87,11 @@ $headers = "From: ubcfirealarmwebserver@test.com" . "\r\n" ."CC: somebodyelse@ex
 $msg = wordwrap($msg,70);
 $sent = mail("stewbertgrant@gmail.com","web server email test",$msg,$headers);
 if ($sent === false){
-	echo "[Email not sent]\n";
+	out( "[Email not sent]\n");
 }
 */
+
+setLogFile();
 
 while(true){
 	if(messageHandle()){
@@ -103,25 +116,28 @@ $serial->deviceClose();
 if so a message object is generated, and added to the message queue for sending to the aeu*/
 function genMessages(){
 	global $serial;
-	global $messageTimer;
+	global $taskTimer;
 	global $messageQueue;
 	//Poll only if no polling is occuring and no messages were received
 	$time = time();
 
-	if ($time - $messageTimer["poll"] > POLLINGTIME){
+	if ($time - $taskTimer["poll"] > POLLINGTIME){
 		$message = getNextPollingRange();
 		$messageQueue->enqueue($message);
-		$messageTimer["poll"] = $time + POLLINGTIME;
-	} else if ($time - $messageTimer["update"] > UPDATETIME){
+		$taskTimer["poll"] = $time + POLLINGTIME;
+	} else if ($time - $taskTimer["update"] > UPDATETIME){
 		$message = new Message("u1\r","[Sending Update ON]\n");
 		$messageQueue->enqueue($message);
-		$messageTimer["update"] = $time;
-	} else if ($time - $messageTimer["firmware"] > FIRMWARETIME){
+		$taskTimer["update"] = $time;
+	} else if ($time - $taskTimer["firmware"] > FIRMWARETIME){
 		$message = new Message("f\r","[Sending firmware info request]\n");
 		$messageQueue->enqueue($message);
-		$messageTimer["firmware"] = $time;
-	} else if ($time - $messageTimer["email"] > EMAILTIME){
-		$messageTimer["email"] = $time;
+		$taskTimer["firmware"] = $time;
+	} else if ($time - $taskTimer["email"] > EMAILTIME){
+		$taskTimer["email"] = $time;
+	} else if ($time - $taskTimer["log"] > LOGFILETIME){
+		setLogFile();
+		$taskTimer["log"] = $time;
 	}
 
 }
@@ -134,11 +150,11 @@ function sendMessage(){
 
 	if(!$messageQueue->isEmpty()){
 		$message = $messageQueue->dequeue();
-		echo $message->echolog;
+		out( $message->echolog);
 		$sent = $serial->sendMessage($message->message);
 	}
 	if (!$sent){
-		echo "MESSAGE NOT SENT";
+		out("[MESSAGE NOT SENT]\n");
 	}
 }
 
@@ -183,7 +199,7 @@ function messageHandle(){
 		case LONGMESSAGELEN:
 			//nack if the checksum is bad
 			if (!checksum($read)){
-				echo "bad checksum";
+				out("[bad checksum]\n");
 				$serial->sendMessage(NAK);
 				return;
 			}
@@ -199,32 +215,32 @@ function messageHandle(){
 					//TODO in the end no events should be null
 					if ($event != null ){
 						$eventQueue->enqueue($event);
-						echo $event->String()."\n";
+						out( $event->String()."\n");
 					}
 					break;
 				case "F":
-					echo "[Firmware Read: ". substr($read,0,21) . "]\n";
+					out( "[Firmware Read: ". substr($read,0,21) . "]\n");
 					break;
 				default:
-					echo "[Unknown Long Command: " . $read . "]\n";
+					out( "[Unknown Long Command: " . $read . "]\n");
 			}
 			$serial->sendMessage(ACK);
 			break;
 		case SHORTMESSAGELEN:
 			switch ($read[0]){
 				case "Y":
-					echo "[Accepted Command]\n";
+					out( "[Accepted Command]\n");
 					break;
 				case "t":
-					echo "[Timeout]\n";
+					out( "[Timeout]\n");
 					//TODO try command again a few times
 					break;
 				case "?":
-					echo "[Bad Command]\n";
+					out( "[Bad Command]\n");
 					//TODO try again but potentially ditch command
 					break;
 				default:
-					echo "[Unknown Short Response: ". $read . "]\n";
+					out( "[Unknown Short Response: ". $read . "]\n");
 			}
 			$serial->sendMessage(ACK);
 			break;
@@ -232,7 +248,7 @@ function messageHandle(){
 			return false;
 		default:
 			//TODO check how many bad messages have happened recently and give up at some point if it breaks
-			echo "Bad message length: ". strlen($read) . " for command " . $read . "\n";
+			out("[Bad message length: ". strlen($read) . " for command " . substr($read,0,strlen($read)-1) . "]\n");
 			//TODO stop throwing away bad events $serial->sendMessage(NAK);
 			$serial->sendMessage(NAK);
 	}
@@ -255,41 +271,33 @@ function parseEventSimulator($message) {
 	$datestr = "20".$y."-".$d."-".$mon." ".$h.":".$min.":".$s;
 	$event->timestamp = \DateTime::createFromFormat('Y-d-m H:i:s',$datestr);
 	if (! $event->timestamp) {
-	    echo sprintf("'%s' is not a valid date.", $datestr);
+	    out( sprintf("'%s' is not a valid date.", $datestr));
 	}	
 	$event->account = substr($message,13,4);
 	$z = substr($message,17,1);
-	switch ($z) {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			$event->zone = $z;
-			break;
-		default:
-			//no other zones are in the db
-			return null;
+	$wiretamper = rand(0,1);
+	if ($wiretamper == 0){
+		switch ($z) {
+			case 1:
+				$event->zone = "A";
+				break;
+			case 2:
+				$event->zone = "B";
+				break;
+			case 3:
+				$event->zone = "C";
+				break;
+			case 4:
+				$event->zone = "D";
+				break;
+			default:
+				//no other zones are in the db
+				return null;
+		}
+	} else {
+		$event->zone = $z;
 	}
-	$e = substr($message,18,1);
-	switch ($e){
-		case 1:
-		case 2:
-			$event->status = $e;
-			break;
-		default:
-			
-			//for testing put event in dead mode
-			switch ($event->zone){
-				case 1:
-					$event->zone = "A";
-				case 2:
-					$event->zone = "B";
-				case 3:
-					$event->zone = "C";
-				default:
-					return null;
-			}
-	}
+	$event->status = substr($message,18,1);
 	$event->message = $message;
 		
 	return $event;
@@ -304,7 +312,7 @@ function genchecksum($message){
 	$csum = 0;
 	for ($i=0;$i<strlen($hex);$i=$i+2){
 		$csum = $csum + (hexdec($hex[$i]) << 4) + hexdec($hex[$i+1]);
-		//echo "checksum: " . $csum . " - " . $hex[$i] . "\n";
+		//out( "checksum: " . $csum . " - " . $hex[$i] . "\n");
 	}
 	return chr($csum >> 8) . chr($csum % 128);
 
@@ -332,7 +340,7 @@ function checksum($message){
 	
 	if($PRODUCTION == false){
 		for ($i=strlen($hex)-3;$i>strlen($hex)-7;$i--){
-			//echo "checksum: " . $sum . " - " . $hex[$i] . "\n";
+			//out( "checksum: " . $sum . " - " . $hex[$i] . "\n");
 			$sum = $sum + (hexdec($hex[$i]) << ($index * 4) );
 			$index++;
 		}
@@ -344,7 +352,7 @@ function checksum($message){
 
 	}
 	if ( $csum != $sum ){
-		echo "bad checksum: " . $sum . " =/= " .$csum."\n";
+		//out( "bad checksum: " . $sum . " =/= " .$csum."\n");
 		return false;
 	}
 	return true;
@@ -369,10 +377,6 @@ function hexToStr($hex){
     return $string;
 }
 
-//--------------------------------------------------------------------//
-/*			DATABASE FUNCTIONS			     */
-//--------------------------------------------------------------------//
-
 function insertEvents() {
 	global $eventQueue;
 	global $db;
@@ -390,7 +394,7 @@ function insertEvents() {
 		$events++;
 		$event = $eventQueue->dequeue();
 		$panel = queryEvent($event);
-		//echo $panel->String() . "\n";
+		//out( $panel->String() . "\n");
 		//TODO make the panel timestamp real
 		//If the panel has no message it is not in the DB yet
 		if ($panel->message == ""){
@@ -412,9 +416,34 @@ function insertEvents() {
 		}
 	}
 	if ($events > 0){
-		echo sprintf("[DB Write Stats :: Total Events: %d \tNew Panels: %d\tNew Events :%d\tOld Events: %d]\n",$events,$newpanels,$newevents,$oldevents);
+		out( sprintf("[DB Write Stats :: Total Events: %d \tNew Panels: %d\tNew Events :%d\tOld Events: %d]\n",$events,$newpanels,$newevents,$oldevents));
 	}
 	
 }
 
+function setLogFile(){
+	global $logfilename;
+	global $logfile;
+	
+	$name = date("FY");
+	if ($logfilename != $name){
+		if($logfile != null){
+			out("[Switching log files to " . $name ."]\n");
+			fclose($logfile);
+		}
+		$logfilename = $name;
+		$logfile = fopen("logs/".$logfilename.".log", "a+") or die("Unable to open file!");
+		out("[New Log " . $logfilename . "]\n");
+	}
+	return;
+}
+
+function out($message){
+	global $logfile;
+	echo $message;
+	fwrite($logfile,$message);
+}
+
 ?>
+
+

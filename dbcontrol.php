@@ -34,11 +34,11 @@ function connectDB(){
         global $db;
 		$db = new mysqli($server, $user, $pass, $dbname);
 		if (!mysqli_connect_errno()) {
-			echo "db connected\n";
+			echo "[db connected]\n";
         }
 
         if (mysqli_connect_errno()) {
-			printf("Connect failed: %s\n", mysqli_connect_error());
+			printf("[Connect failed: %s]\n", mysqli_connect_error());
 			exit();
         }
 }
