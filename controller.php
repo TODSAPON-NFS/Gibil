@@ -74,6 +74,7 @@ $groupsGap = 1000;
 $logfilename;
 $logfile;
 
+
 /*
 
 //mail functionality		
@@ -92,6 +93,12 @@ if ($sent === false){
 */
 
 setLogFile();
+
+//signal handling
+declare(ticks=1); // PHP internal, make signal handling work
+pcntl_signal(SIGTERM, "sig_handler");
+pcntl_signal(SIGINT, "sig_handler");
+pcntl_signal(SIGKILL, "sig_handler");
 
 while(true){
 	if(messageHandle()){
@@ -433,7 +440,11 @@ function setLogFile(){
 		}
 		$logfilename = $name;
 		$logfile = fopen("logs/".$logfilename.".log", "a+") or die("Unable to open file!");
-		out("[New Log " . $logfilename . "]\n");
+		if (filesize("logs/".$logfilename.".log") > 0){
+			out("[New Execution: ". date("F j, Y, g:i a")."]\n");
+		} else {
+			out("[New Log " . $logfilename . "]\n");
+		}
 	}
 	return;
 }
@@ -442,6 +453,24 @@ function out($message){
 	global $logfile;
 	echo $message;
 	fwrite($logfile,$message);
+}
+
+
+// signal handler function
+function sig_handler($signo)
+{
+
+     switch ($signo) {
+         case SIGTERM:
+         case SIGINT:
+         case SIGKILL:
+	     out("[Shutting Down: ". date("F j, Y, g:i a")."]\n");
+             exit;
+             break;
+         default:
+             // handle all other signals
+     }
+
 }
 
 ?>
