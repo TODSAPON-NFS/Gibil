@@ -57,7 +57,7 @@ $taskTimer = [
 ];
 
 //True if working with the real AEU
-$PRODUCTION = false;
+$PRODUCTION = true;
 
 
 
@@ -98,8 +98,8 @@ setLogFile();
 declare(ticks=1); // PHP internal, make signal handling work
 pcntl_signal(SIGTERM, "sig_handler");
 pcntl_signal(SIGINT, "sig_handler");
-pcntl_signal(SIGKILL, "sig_handler");
 
+/*
 for ($i=0;$i<5;$i++){
 	$serial->sendMessage(ACK);
 }
@@ -126,7 +126,7 @@ for ($i=0;$i<5;$i++){
 for ($i=0;$i<5;$i++){
 	$serial->sendMessage(ACK);
 }
-
+*/
 
 while(true){
 	if(messageHandle()){
@@ -153,6 +153,7 @@ function genMessages(){
 	global $serial;
 	global $taskTimer;
 	global $messageQueue;
+	global $PRODUCTION;
 	//Poll only if no polling is occuring and no messages were received
 	$time = time();
 
@@ -165,9 +166,11 @@ function genMessages(){
 		$messageQueue->enqueue($message);
 		$taskTimer["update"] = $time;
 	} else if ($time - $taskTimer["firmware"] > FIRMWARETIME){
-		$message = new Message("f\r","Sending firmware info request");
-		$messageQueue->enqueue($message);
-		$taskTimer["firmware"] = $time;
+		if (!$PRODUCTION){
+			$message = new Message("f\r","Sending firmware info request");
+			$messageQueue->enqueue($message);
+			$taskTimer["firmware"] = $time;
+		}
 	} else if ($time - $taskTimer["email"] > EMAILTIME){
 		$taskTimer["email"] = $time;
 	} else if ($time - $taskTimer["log"] > LOGFILETIME){
@@ -492,7 +495,6 @@ function sig_handler($signo)
      switch ($signo) {
          case SIGTERM:
          case SIGINT:
-         case SIGKILL:
 	     out("[Shutting Down: ". date("F j, Y, g:i a")."]\n");
              exit;
              break;

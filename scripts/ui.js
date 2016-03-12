@@ -1,16 +1,17 @@
 var GREEN = 'rgba(179, 255, 204, 0)';
+var FAULTGREEN = tinycolor(GREEN).setAlpha(.5).toRgbString();
 var AMBER = '#F39720'; //This should really change I dont really like it
 var YELLOW = '#e1e37b';
 var BLUE = '#62d9f4';
 var RED = '#cd2737';
+var PURPLE = '#821b8d';
 
-var DEFAULTTEXTCOLOR = '#6f6a57'
+var DEFAULTTEXTCOLOR = '#6f6a57';
 
 
 function update(panel, id) {
 
     //update the date and status
-    console.log(id);
     document.getElementById( id + "-date").innerHTML = panel["timestamp"];
     document.getElementById( id + "-status").innerHTML = "status: "+ panel["message"];
     
@@ -26,20 +27,32 @@ function update(panel, id) {
     pBox.innerHTML = 'P';
 
 	idBox.style.backgroundColor = GREEN;
-
+	
+	//check for dead panels
+	if (	
+		 panel["alarmwirestate"] == "0" &&
+		 panel["alarmstate"] == "0" &&
+		 panel["troublewirestate"] == "0" &&
+		 panel["troublestate"] == "0" &&
+		 panel["supervisorywirestate"] == "0" &&
+		 panel["supervisorystate"] == "0" &&
+		 panel["powerstate"] == "0"
+	){
+		idBox.style.backgroundColor = PURPLE;
+	}	
 
 	//idbox // go gray if the last message was > 24h
 	//alarm
 	switch (panel["alarmwirestate"]){
+	case "0":
 	case "1":
 		switch (panel["alarmstate"]){
+		case "0":
 		case "1":
-        		aBox.innerHTML = 'A';
         		aBox.style.color = DEFAULTTEXTCOLOR;
         		aBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
-        		aBox.innerHTML = 'A';
         		aBox.style.color = tinycolor(RED).darken(40).toRgbString();
         		aBox.style.backgroundColor = RED;
 			break;
@@ -47,61 +60,63 @@ function update(panel, id) {
 		break;
 	case "2":
 		switch (panel["alarmstate"]){
+		case "0":
 		case "1":
-        		aBox.innerHTML = 'A';
         		aBox.style.color = DEFAULTTEXTCOLOR;
-        		aBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
+        		aBox.style.backgroundColor = FAULTGREEN;
 			break;
 		case "2":
-        		aBox.innerHTML = 'A';
         		aBox.style.color = tinycolor(RED).darken(40).toRgbString();
-        		aBox.style.backgroundColor = tinycolor(RED).setAlpha(.2).toRgbString();
+        		aBox.style.backgroundColor = RED;
+        		//aBox.style.backgroundColor = tinycolor(RED).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
 	}
 	//trouble
 	switch (panel["troublewirestate"]){
+	case "0":
 	case "1":
+	//wiring loop ok
 		switch (panel["troublestate"]){
+		case "0":
 		case "1":
-        		tBox.innerHTML = 'T';
         		tBox.style.color = DEFAULTTEXTCOLOR;
         		tBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
-        		tBox.innerHTML = 'T';
         		tBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
         		tBox.style.backgroundColor = YELLOW;
 			break;
 		}
 		break;
 	case "2":
+	//wiring loop alarm
 		switch (panel["troublestate"]){
+		case "0":
 		case "1":
-        		tBox.innerHTML = 'T';
         		tBox.style.color = DEFAULTTEXTCOLOR;
-        		tBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
+        		tBox.style.backgroundColor = FAULTGREEN;
 			break;
 		case "2":
-        		tBox.innerHTML = 'T';
         		tBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
-        		tBox.style.backgroundColor = tinycolor(YELLOW).setAlpha(.2).toRgbString();
+        		tBox.style.backgroundColor = YELLOW;
+        		//tBox.style.backgroundColor = tinycolor(YELLOW).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
 	}
 	//supervisory
 	switch (panel["supervisorywirestate"]){
+	case "0":
 	case "1":
 		switch (panel["supervisorystate"]){
+		case "0":
 		case "1":
-        		sBox.innerHTML = 'S';
         		sBox.style.color = DEFAULTTEXTCOLOR;
         		sBox.style.backgroundColor = GREEN;
 			break;
 		case "2":
-        		sBox.innerHTML = 'S';
         		sBox.style.color = tinycolor(BLUE).darken(40).toRgbString();
         		sBox.style.backgroundColor = BLUE;
 			break;
@@ -109,21 +124,22 @@ function update(panel, id) {
 		break;
 	case "2":
 		switch (panel["supervisorystate"]){
+		case "0":
 		case "1":
-        		sBox.innerHTML = 'S';
         		sBox.style.color = DEFAULTTEXTCOLOR;
-        		sBox.style.backgroundColor = tinycolor(GREEN).setAlpha(.2).toRgbString();
+        		sBox.style.backgroundColor = FAULTGREEN;
 			break;
 		case "2":
-        		sBox.innerHTML = 'S';
         		sBox.style.color = tinycolor(BLUE).darken(40).toRgbString();
-        		sBox.style.backgroundColor = tinycolor(BLUE).setAlpha(.2).toRgbString();
+        		sBox.style.backgroundColor = BLUE;
+        		//sBox.style.backgroundColor = tinycolor(BLUE).setAlpha(.2).toRgbString();
 			break;
 		}
 		break;
 	}
 	//power
 	switch (panel["powerstate"]){
+	case "0":
 	case "1":
 		pBox.innerHTML = 'P';
 		pBox.style.color = DEFAULTTEXTCOLOR;
@@ -184,8 +200,18 @@ function updateRecent(panels) {
 		document.getElementById("after").innerHTML = "Outstanding Since : "+ breakPointTime.toString() ;
 		
 		//remove panels that have been set to green
-		var green = GREEN;
-		if ( alarmStatus == green && tamperStatus == green && supervisorStatus == green && powerStatus == green) {
+		//var green = GREEN;
+		var red = RED;
+		var yellow = YELLOW;
+		var blue = BLUE;
+		var amber = AMBER;
+		//console.log(tinycolor(alarmStatus).toHex() + tinycolor(RED).toHex());
+		if ( 
+			tinycolor(alarmStatus).toHex() != tinycolor(RED).toHex() && 
+			tinycolor(tamperStatus).toHex() != tinycolor(YELLOW).toHex() && 
+			tinycolor(supervisorStatus).toHex() != tinycolor(BLUE).toHex() && 
+			tinycolor(powerStatus).toHex() != tinycolor(AMBER).toHex()
+		) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it
 			if(newlyOkPanel != null){
