@@ -100,6 +100,34 @@ pcntl_signal(SIGTERM, "sig_handler");
 pcntl_signal(SIGINT, "sig_handler");
 pcntl_signal(SIGKILL, "sig_handler");
 
+for ($i=0;$i<5;$i++){
+	$serial->sendMessage(ACK);
+}
+//while (true){
+for ($i=0;$i<5;$i++){
+	//read the clock
+	$clockread="cr\r";
+	$serial->sendMessage($clockread);	
+	sleep(.1);
+	$read = $serial->readPort();
+	out( "ClockRead: ". $read);
+
+	//write the clock
+	$clockReset="cw010101000000AAAAA";
+	out( "cs : ".genchecksum($clockReset));
+	$clockReset = $clockReset . genchecksum($clockReset) . "\r";
+	out( substr($clockReset,0,strlen($clockReset)-1));
+	out( strlen($clockReset));
+	$serial->sendMessage($clockReset);
+	sleep(.1);
+	$read = $serial->readPort();
+	out( "CORRECT: ". substr($read,0,strlen($read)));
+}
+for ($i=0;$i<5;$i++){
+	$serial->sendMessage(ACK);
+}
+
+
 while(true){
 	if(messageHandle()){
 		//do if a message was received
@@ -133,11 +161,11 @@ function genMessages(){
 		$messageQueue->enqueue($message);
 		$taskTimer["poll"] = $time + POLLINGTIME;
 	} else if ($time - $taskTimer["update"] > UPDATETIME){
-		$message = new Message("u1\r","[Sending Update ON]\n");
+		$message = new Message("u1\r","Sending Update ON");
 		$messageQueue->enqueue($message);
 		$taskTimer["update"] = $time;
 	} else if ($time - $taskTimer["firmware"] > FIRMWARETIME){
-		$message = new Message("f\r","[Sending firmware info request]\n");
+		$message = new Message("f\r","Sending firmware info request");
 		$messageQueue->enqueue($message);
 		$taskTimer["firmware"] = $time;
 	} else if ($time - $taskTimer["email"] > EMAILTIME){
@@ -161,7 +189,7 @@ function sendMessage(){
 		$sent = $serial->sendMessage($message->message);
 	}
 	if (!$sent){
-		out("[MESSAGE NOT SENT]\n");
+		out("MESSAGE NOT SENT");
 	}
 }
 
@@ -177,7 +205,7 @@ function getNextPollingRange(){
 
 	$account = $baseAccount + (($currentGroup - 1) * $groupsGap) + $currentAccount;
 	$pollingMessage = sprintf("r%d/%d\r",$account,$pollingRange);
-	$echoMessage = sprintf("[Polling [%d,%d]]\n",$account,$account+$pollingRange);
+	$echoMessage = sprintf("Polling [%d,%d]",$account,$account+$pollingRange);
 	$m = new Message($pollingMessage,$echoMessage);
 	
 	//update the status of the polling range
@@ -206,7 +234,7 @@ function messageHandle(){
 		case LONGMESSAGELEN:
 			//nack if the checksum is bad
 			if (!checksum($read)){
-				out("[bad checksum]\n");
+				out("bad checksum");
 				$serial->sendMessage(NAK);
 				return;
 			}
@@ -222,32 +250,32 @@ function messageHandle(){
 					//TODO in the end no events should be null
 					if ($event != null ){
 						$eventQueue->enqueue($event);
-						out( $event->String()."\n");
+						out( $event->String());
 					}
 					break;
 				case "F":
-					out( "[Firmware Read: ". substr($read,0,21) . "]\n");
+					out( "Firmware Read: ". substr($read,0,21));
 					break;
 				default:
-					out( "[Unknown Long Command: " . $read . "]\n");
+					out( "Unknown Long Command: " . $read);
 			}
 			$serial->sendMessage(ACK);
 			break;
 		case SHORTMESSAGELEN:
 			switch ($read[0]){
 				case "Y":
-					out( "[Accepted Command]\n");
+					out( "Accepted Command");
 					break;
 				case "t":
-					out( "[Timeout]\n");
+					out( "Timeout");
 					//TODO try command again a few times
 					break;
 				case "?":
-					out( "[Bad Command]\n");
+					out( "Bad Command");
 					//TODO try again but potentially ditch command
 					break;
 				default:
-					out( "[Unknown Short Response: ". $read . "]\n");
+					out( "Unknown Short Response: ". $read);
 			}
 			$serial->sendMessage(ACK);
 			break;
@@ -255,7 +283,7 @@ function messageHandle(){
 			return false;
 		default:
 			//TODO check how many bad messages have happened recently and give up at some point if it breaks
-			out("[Bad message length: ". strlen($read) . " for command " . substr($read,0,strlen($read)-1) . "]\n");
+			out("Bad message length: ". strlen($read) . " for command " . substr($read,0,strlen($read)-1));
 			//TODO stop throwing away bad events $serial->sendMessage(NAK);
 			$serial->sendMessage(NAK);
 	}
@@ -423,7 +451,7 @@ function insertEvents() {
 		}
 	}
 	if ($events > 0){
-		out( sprintf("[DB Write Stats :: Total Events: %d \tNew Panels: %d\tNew Events :%d\tOld Events: %d]\n",$events,$newpanels,$newevents,$oldevents));
+		out( sprintf("DB Write Stats :: Total Events: %d \tNew Panels: %d\tNew Events :%d\tOld Events: %d",$events,$newpanels,$newevents,$oldevents));
 	}
 	
 }
@@ -435,15 +463,15 @@ function setLogFile(){
 	$name = date("FY");
 	if ($logfilename != $name){
 		if($logfile != null){
-			out("[Switching log files to " . $name ."]\n");
+			out("Switching log files to " . $name);
 			fclose($logfile);
 		}
 		$logfilename = $name;
 		$logfile = fopen("logs/".$logfilename.".log", "a+") or die("Unable to open file!");
 		if (filesize("logs/".$logfilename.".log") > 0){
-			out("[New Execution: ". date("F j, Y, g:i a")."]\n");
+			out("New Execution");
 		} else {
-			out("[New Log " . $logfilename . "]\n");
+			out("New Log " . $logfilename );
 		}
 	}
 	return;
@@ -451,6 +479,7 @@ function setLogFile(){
 
 function out($message){
 	global $logfile;
+	$message = "[". $message ."][" . date("F j, Y, g:i a") ."]\n";
 	echo $message;
 	fwrite($logfile,$message);
 }
