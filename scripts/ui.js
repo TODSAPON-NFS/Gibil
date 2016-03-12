@@ -1,10 +1,10 @@
 var GREEN = 'rgba(179, 255, 204, 0)';
-var FAULTGREEN = tinycolor(GREEN).setAlpha(.5).toRgbString();
+var GRAY = '#d3d3d3';
 var AMBER = '#F39720'; //This should really change I dont really like it
 var YELLOW = '#e1e37b';
 var BLUE = '#62d9f4';
 var RED = '#cd2737';
-var PURPLE = '#821b8d';
+var PURPLE = '#330b38';
 
 var DEFAULTTEXTCOLOR = '#6f6a57';
 
@@ -63,7 +63,7 @@ function update(panel, id) {
 		case "0":
 		case "1":
         		aBox.style.color = DEFAULTTEXTCOLOR;
-        		aBox.style.backgroundColor = FAULTGREEN;
+        		aBox.style.backgroundColor = GRAY;
 			break;
 		case "2":
         		aBox.style.color = tinycolor(RED).darken(40).toRgbString();
@@ -96,7 +96,7 @@ function update(panel, id) {
 		case "0":
 		case "1":
         		tBox.style.color = DEFAULTTEXTCOLOR;
-        		tBox.style.backgroundColor = FAULTGREEN;
+        		tBox.style.backgroundColor = GRAY;
 			break;
 		case "2":
         		tBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
@@ -127,7 +127,7 @@ function update(panel, id) {
 		case "0":
 		case "1":
         		sBox.style.color = DEFAULTTEXTCOLOR;
-        		sBox.style.backgroundColor = FAULTGREEN;
+        		sBox.style.backgroundColor = GRAY;
 			break;
 		case "2":
         		sBox.style.color = tinycolor(BLUE).darken(40).toRgbString();
