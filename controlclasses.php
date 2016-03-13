@@ -18,7 +18,10 @@ class Event {
 	public $timestamp;
 	public $message;
 	
-	function Event($message){
+	function Event($message = ""){
+		if ($message == "") {
+			return $this;
+		}
 		$d = substr($message,1,2);
 		$mon = substr($message,3,2);
 		$y = substr($message,5,2);
@@ -89,6 +92,52 @@ class Panel {
 			$this->timestamp,$this->message);
 	}
 
+	function getEvent($zone){
+		$event = new Event();
+		$event->$zone = $zone;
+		$event->account = $this->account;
+		switch ($zone){
+			case "1":
+				$event->timestamp =  $this->at;
+				$event->status = $this->as;
+				break;
+			case "2":
+				$event->timestamp =  $this->st;
+				$event->status = $this->ss;
+				break;
+			case "3":
+				$event->timestamp =  $this->tt;
+				$event->status = $this->ts;
+				break;
+			case "4":
+				$event->timestamp =  $this->pt;
+				$event->status = $this->ps;
+				break;
+			case "A":
+				$event->timestamp =  $this->awt;
+				$event->status = $this->aws;
+				break;
+			case "B":
+				$event->timestamp =  $this->swt;
+				$event->status = $this->sws;
+				break;
+			case "C":
+				$event->timestamp =  $this->twt;
+				$event->status = $this->tws;
+				break;
+			case "D":
+				$event->timestamp =  $this->pwt;
+				$event->status = $this->pws;
+				break;
+			default:
+				$event = null;
+				break;
+
+		}
+		$event->timestamp = date_create($event->timestamp);
+		return $event;
+	}
+
 	function getZoneTimestamp($zone){
 		switch ($zone){
 			case "1":
@@ -139,6 +188,33 @@ class Panel {
 		$this->message = "";
 		//no timestamps in the default
 		return $this;
+	}
+
+	function Equals($panel){
+		if(
+			$this->account == $panel->account &&
+			$this->as == $panel->as &&
+			$this->at == $panel->at &&
+			$this->ss == $panel->ss &&
+			$this->st == $panel->st &&
+			$this->ts == $panel->ts &&
+			$this->tt == $panel->tt &&
+			$this->ps == $panel->ps &&
+			$this->pt == $panel->pt &&
+			$this->aws == $panel->aws &&
+			$this->awt == $panel->awt &&
+			$this->sws == $panel->sws &&
+			$this->swt == $panel->swt &&
+			$this->tws == $panel->tws &&
+			$this->twt == $panel->twt &&
+			$this->pws == $panel->pws &&
+			$this->pwt == $panel->pwt &&
+			$this->timestamp == $panel->timestamp &&
+			$this->message == $panel->message
+		) {
+			return true;
+		}
+		return false;
 	}
 
 	function Update($event){

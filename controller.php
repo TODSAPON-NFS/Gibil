@@ -390,7 +390,7 @@ function checksum($message){
 
 	}
 	if ( $csum != $sum ){
-		//out( "bad checksum: " . $sum . " =/= " .$csum."\n");
+		out( "bad checksum: " . $sum . " =/= " .$csum."\n");
 		return false;
 	}
 	return true;
@@ -432,17 +432,21 @@ function insertEvents() {
 		$events++;
 		$event = $eventQueue->dequeue();
 		$panel = queryEvent($event);
+		$panelEvent = $panel->getEvent($event->zone);
+		out($panelEvent->String());
 		//out( $panel->String() . "\n");
 		//TODO make the panel timestamp real
 		//If the panel has no message it is not in the DB yet
 		if ($panel->message == ""){
+			//out("Addiing new panel + ".$panel->account." to DB"); 
 			//addToDB
 			$panel->Update($event);
 			insertPanelDB($panel);
 			$newpanels++;
 		}
 		//The event is newer than what is in the DB so add it 
-		else if ($event->timestamp->getTimestamp() > date_create($panel->getZoneTimestamp($event->zone))->getTimestamp()){
+		else if ($event->timestamp->getTimestamp() >= $panelEvent->timestamp->getTimestamp() && $event->status != $panelEvent->status){
+			//out("Updating: ".$panel->account."-".$event->zone);
 			$panel->Update($event);
 			updatePanelDB($panel);
 			//updateDB
@@ -450,6 +454,7 @@ function insertEvents() {
 		}
 		//The event timestamp <= whats in the DB its old and is ignored 
 		else {
+			//out("Old event");
 			$oldevents++;
 		}
 	}
@@ -482,7 +487,7 @@ function setLogFile(){
 
 function out($message){
 	global $logfile;
-	$message = "[". $message ."][" . date("F j, Y, g:i a") ."]\n";
+	$message = "[". $message ."][" . date("ymdhis") ."]\n";
 	echo $message;
 	fwrite($logfile,$message);
 }

@@ -1,7 +1,7 @@
 <?php
 $pass = $_POST['pass'];
 
-if($pass == "admin")
+if($pass == "flsdscip")
 {
         include "home.php" ;
  
