@@ -1,8 +1,7 @@
 <?php
 $pass = $_POST['pass'];
 
-if($pass == "flsdscip")
-{
+if(md5($pass) == "2ddb060589fb3b9e33a497c13d5f89d5"){
         include "home.php" ;
  
 }
