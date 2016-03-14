@@ -29,6 +29,10 @@ clone repository to home directory
 initalize the db
 `mysql -u root -p < initdb.sql`
 
+link apache to gibil
+`cd /var/www/html`
+`ln -s /home/gibil/Gibil/`
+
 
 ## Installation Steps (Serial Interface)
 
@@ -41,3 +45,15 @@ add apache and www-data to the dialout usergroup
 
 if nessisary change the privilages of the serial port in use
 `sudo chmod 777 \dev\ttyS_`
+
+
+## Install Background maintenence service
+
+To setup gibil as a background task add the folowing command to /etc/crontab
+`* * * * * root exec /home/gibil/Gibil/maintain.sh` 
+
+## Install Automatic Email warnings
+gibil is configured to send emails automatically when failures 
+occur. The functionality is setup through the php mail() function.
+ A detailed guide to setting up an msmtp server can be found 
+[here]:https://www.digitalocean.com/community/tutorials/how-to-use-gmail-or-yahoo-with-php-mail-function

@@ -4,15 +4,23 @@ include "dbcontrol.php";
 include "controlclasses.php";
 define ("ACK", chr(6));
 define ("NAK", chr(21));
+define ("XON", chr(17));
+define ("XOFF", chr(19));
 define ("SHORTMESSAGELEN", 2);
 define ("LONGMESSAGELEN", 22);
 
-//Timing intervals // TODO set better ones
+//Timing intervals for periodic tasks// TODO set better ones
 define ("POLLINGTIME", 5);
 define ("UPDATETIME", 15);
 define ("FIRMWARETIME", 15);
-define ("EMAILTIME", 15);
 define ("LOGFILETIME",15);
+
+//timing intervals for event driven tasks
+define ("TROUBLESHOOTTIME", 15);
+define ("EMAILTIME", 30);
+define ("EMAILFREQUENCY", 60*60*24);
+
+define ("LOGDIR","/home/gibil/Gibil/logs/");
 
 
 
@@ -52,8 +60,9 @@ $taskTimer = [
 	"poll" => time() - POLLINGTIME,
 	"update" => time() - UPDATETIME, 
 	"firmware" => time() - FIRMWARETIME,
-	"email" => time() - EMAILTIME,
 	"log" => time() - LOGFILETIME,
+	"email" => time() - EMAILFREQUENCY,
+	"lastmessage" => time(), 
 ];
 
 //True if working with the real AEU
@@ -75,22 +84,7 @@ $logfilename;
 $logfile;
 
 
-/*
 
-//mail functionality		
-out( "[SENDING EMAIL]\n");
-$msg = "Hello Howard,
-This is an email test from the web server
-
-cheers,
--Stewart\n";
-$headers = "From: ubcfirealarmwebserver@test.com" . "\r\n" ."CC: somebodyelse@example.com";
-$msg = wordwrap($msg,70);
-$sent = mail("stewbertgrant@gmail.com","web server email test",$msg,$headers);
-if ($sent === false){
-	out( "[Email not sent]\n");
-}
-*/
 
 setLogFile();
 
@@ -99,48 +93,22 @@ declare(ticks=1); // PHP internal, make signal handling work
 pcntl_signal(SIGTERM, "sig_handler");
 pcntl_signal(SIGINT, "sig_handler");
 
-/*
-for ($i=0;$i<5;$i++){
-	$serial->sendMessage(ACK);
-}
-//while (true){
-for ($i=0;$i<5;$i++){
-	//read the clock
-	$clockread="cr\r";
-	$serial->sendMessage($clockread);	
-	sleep(.1);
-	$read = $serial->readPort();
-	out( "ClockRead: ". $read);
 
-	//write the clock
-	$clockReset="cw010101000000AAAAA";
-	out( "cs : ".genchecksum($clockReset));
-	$clockReset = $clockReset . genchecksum($clockReset) . "\r";
-	out( substr($clockReset,0,strlen($clockReset)-1));
-	out( strlen($clockReset));
-	$serial->sendMessage($clockReset);
-	sleep(.1);
-	$read = $serial->readPort();
-	out( "CORRECT: ". substr($read,0,strlen($read)));
-}
-for ($i=0;$i<5;$i++){
-	$serial->sendMessage(ACK);
-}
-*/
 
 while(true){
+	global $taskTimer;
 	if(messageHandle()){
 		//do if a message was received
+		$taskTimer["lastmessage"] = time();
 	} else {
 		//non message received tasks
 		insertEvents();
-		genMessages();
+		taskMannage();
 		sendMessage();
 	}
 	
 	
 }
-
 
 // If you want to change the configuration, the device must be closed
 $serial->deviceClose();
@@ -149,34 +117,49 @@ $serial->deviceClose();
 	
 /* genMessages checks the message timer to see if any periodic messages such as polling, or update are due to be sent.
 if so a message object is generated, and added to the message queue for sending to the aeu*/
-function genMessages(){
+function taskMannage(){
 	global $serial;
 	global $taskTimer;
 	global $messageQueue;
 	global $PRODUCTION;
+	global $lastMessageTime;
 	//Poll only if no polling is occuring and no messages were received
 	$time = time();
 
+	//periodic
 	if ($time - $taskTimer["poll"] > POLLINGTIME){
 		$message = getNextPollingRange();
 		$messageQueue->enqueue($message);
 		$taskTimer["poll"] = $time + POLLINGTIME;
-	} else if ($time - $taskTimer["update"] > UPDATETIME){
+	} 
+	if ($time - $taskTimer["update"] > UPDATETIME){
 		$message = new Message("u1\r","Sending Update ON");
 		$messageQueue->enqueue($message);
 		$taskTimer["update"] = $time;
-	} else if ($time - $taskTimer["firmware"] > FIRMWARETIME){
-		if (!$PRODUCTION){
-			$message = new Message("f\r","Sending firmware info request");
-			$messageQueue->enqueue($message);
-			$taskTimer["firmware"] = $time;
-		}
-	} else if ($time - $taskTimer["email"] > EMAILTIME){
-		$taskTimer["email"] = $time;
-	} else if ($time - $taskTimer["log"] > LOGFILETIME){
+	} 
+	if ($time - $taskTimer["firmware"] > FIRMWARETIME){
+		$message = new Message("f\r","Sending firmware info request");
+		$messageQueue->enqueue($message);
+		$taskTimer["firmware"] = $time;
+	}
+ 
+	if ($time - $taskTimer["log"] > LOGFILETIME){
 		setLogFile();
 		$taskTimer["log"] = $time;
 	}
+
+	//event driven
+	if ($time - $taskTimer["lastmessage"] > TROUBLESHOOTTIME){
+		$message = new Message(XON,"Troubleshooting with XON");
+		$messageQueue->enqueue($message);
+	} 
+	if (
+		$time - $taskTimer["lastmessage"] > EMAILTIME &&
+		$time - $taskTimer["email"] > EMAILFREQUENCY
+	){
+		sendEmail();
+		$taskTimer["email"] = $time;
+	} 
 
 }
 
@@ -468,21 +451,46 @@ function setLogFile(){
 	global $logfilename;
 	global $logfile;
 	
-	$name = date("FY");
+	$name = LOGDIR.date("FY").".log";
 	if ($logfilename != $name){
 		if($logfile != null){
 			out("Switching log files to " . $name);
 			fclose($logfile);
 		}
 		$logfilename = $name;
-		$logfile = fopen("logs/".$logfilename.".log", "a+") or die("Unable to open file!");
-		if (filesize("logs/".$logfilename.".log") > 0){
+		touch($logfilename);
+		chmod($logfilename,0777);
+		$logfile = fopen($logfilename, "a+") or die("Unable to open file!");
+		if (filesize($logfilename) > 0){
 			out("New Execution");
 		} else {
 			out("New Log " . $logfilename );
 		}
 	}
 	return;
+}
+
+function sendEmail(){
+	global $taskTimer;
+	//mail functionality		
+	out( "[SENDING EMAIL]\n");
+	$msg = 
+"Hi All,
+This is an automatic email from the AEU Web Server
+
+The webserver has not receved any messages from the aeu in ". (time() - $taskTimer["lastmessage"]). "s 
+and may be unpluged consider plugging it in
+
+cheers,
+-AEU Webserver.\n";
+
+	$headers = "From: stewbertgrant@gmail.com" . "\r\n" .
+			"CC: davis@dccnet.com , stewbertgrant@gmail.com";
+	$msg = wordwrap($msg,70);
+	$sent = mail("xerwnexa@sharklasers.com","web server email test",$msg,$headers);
+	if ($sent === false){
+		out( "[Email not sent]\n");
+	}
 }
 
 function out($message){
