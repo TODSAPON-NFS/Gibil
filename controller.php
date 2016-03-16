@@ -416,7 +416,6 @@ function insertEvents() {
 		$event = $eventQueue->dequeue();
 		$panel = queryEvent($event);
 		$panelEvent = $panel->getEvent($event->zone);
-		out($panelEvent->String());
 		//out( $panel->String() . "\n");
 		//TODO make the panel timestamp real
 		//If the panel has no message it is not in the DB yet

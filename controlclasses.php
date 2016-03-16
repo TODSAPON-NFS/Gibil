@@ -43,7 +43,7 @@ class Event {
 	}
 		
 	function String() {
-		return sprintf("[Account :%s, Zone :%s, Status :%s, Timestamp %s, Message %s]",$this->account,$this->zone,$this->status,$this->timestamp->format(DateTime::RFC2822), $this->message);
+		return sprintf("Account :%s, Zone :%s, Status :%s, Timestamp %s, Message %s",$this->account,$this->zone,$this->status,$this->timestamp->format(DateTime::RFC2822), $this->message);
 	}
 }
 
