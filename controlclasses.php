@@ -1,9 +1,25 @@
 <?php
 
+
+/*
+*/
+
+/* controlclasses.php contains the class files for objects used by the gibil serial controller. Most of these are wrappers for DB objects or information read from the serial port. The classes are as follows:
+
+	*Message
+	*Event
+	*Panel
+*/
+
+/* Message is a wraper for data being send over the serial port to the aeu */
 class Message {
 	public $message;
 	public $echolog;
-
+	
+	/* Constructor
+	@param m (string) The message being send to the AEU
+	@param l (string) the message to be output to the log file when the message is sent
+	*/
 	function Message ($m, $l) {
 		$this->message = $m;
 		$this->echolog = $l;
@@ -11,30 +27,40 @@ class Message {
 	}
 }
 
+/* Event is a wraper for data received from the AEU */
 class Event {
-	public $account;
-	public $zone;
-	public $status;
-	public $timestamp;
-	public $message;
+	public $account;	//The account number of the panel [4001 - 7100]
+	public $zone;		//The panel zone [1234ABCD]
+	public $status;		//panel status 0=none, 1=ok, 2=alarm
+	public $timestamp;	//datetime object of the timestamp
+	public $message;	//The actual message received from the AEU
 	
+	/* constructor
+	@param message, is the message received from the AEU 
+		if message == ""then an event with no set values is returned
+
+	The message format is DDMMYYhhmmssAAAAscs\r 
+	for more info see AEU documentation.
+	*/
 	function Event($message = ""){
 		if ($message == "") {
 			return $this;
 		}
+		//Parse the date from the message
 		$d = substr($message,1,2);
 		$mon = substr($message,3,2);
 		$y = substr($message,5,2);
 		$h = substr($message,7,2);
 		$min = substr($message,9,2);
 		$s = substr($message,11,2);
-
+		//build timesamp assuming the year is 20XX
 		$datestr = "20".$y."-".$d."-".$mon." ".$h.":".$min.":".$s;
 		$this->timestamp = \DateTime::createFromFormat('Y-d-m H:i:s',$datestr);
 		if (! $this->timestamp) {
 		    out( sprintf("'%s' is not a valid date.", $datestr));
 		    return null;
 		}	
+		//parse account, zone, status, and message (removing the \r)
 		$this->account = substr($message,13,4);
 		$this->zone = substr($message,17,1);
 		$this->status = substr($message,18,1);
@@ -42,11 +68,13 @@ class Event {
 		return $this;
 	}
 		
+	/* Returns a string of the event */
 	function String() {
 		return sprintf("Account :%s, Zone :%s, Status :%s, Timestamp %s, Message %s",$this->account,$this->zone,$this->status,$this->timestamp->format(DateTime::RFC2822), $this->message);
 	}
 }
 
+/* Panel is a wrapper for the panels in the DB, a panel has 8 zones, each one contains a timestamp from when its last event was received */
 class Panel {
 	public $account;	//account number
 	public $as;		//alarm status
@@ -68,6 +96,7 @@ class Panel {
 	public $timestamp;	//most recent timestamp
 	public $message;	//message for aux usage
 	
+	//String representation of a panel
 	function String() {
 		return sprintf(
 			"account :%s
@@ -92,6 +121,11 @@ class Panel {
 			$this->timestamp,$this->message);
 	}
 
+	/* getEvent reconstructs the last event message receved based on a zone
+	@param zone the zone being queried
+	@return the last event for the suppiled zone. 
+		If the zone is not in the range [1234ABCD] null is returned
+	*/
 	function getEvent($zone){
 		$event = new Event();
 		$event->$zone = $zone;
@@ -138,29 +172,10 @@ class Panel {
 		return $event;
 	}
 
-	function getZoneTimestamp($zone){
-		switch ($zone){
-			case "1":
-				return $this->at;
-			case "2":
-				return $this->st;
-			case "3":
-				return $this->tt;
-			case "4":
-				return $this->pt;
-			case "A":
-				return $this->awt;
-			case "B":
-				return $this->swt;
-			case "C":
-				return $this->twt;
-			case "D":
-				return $this->pwt;
-		}
-		return "";
-	}
-
-	//construct a new panel in the off state
+	/*construct a new panel in the off state, the timestamp for 
+		each zone is set to unix epoch time ~1970, and
+		the default message is set to ""
+	*/
 	function Panel($account){
 		//Set the default time to UNIX EPOCH
 		$epochTime = new DateTime();
@@ -189,7 +204,11 @@ class Panel {
 		//no timestamps in the default
 		return $this;
 	}
-
+	/*Equals is the equivelece checker
+		if all feilds are equal, return true
+		else return false
+		@param panel the panel being checked for equivilence with this
+	*/
 	function Equals($panel){
 		if(
 			$this->account == $panel->account &&
@@ -216,7 +235,10 @@ class Panel {
 		}
 		return false;
 	}
-
+	/* Update merges an event with a panel, the panels timestamp is made
+		equal to the most recent events, along with the message
+		@param event an event to update the panel
+	*/
 	function Update($event){
 		//update timestamp will have to be distributed later
 		$this->timestamp = $event->timestamp->format(DateTime::RFC2822);

@@ -1,11 +1,35 @@
 <?php
+/* 
+   controller.php is the serial I/O controller that commuicates with the aeu
+   In general the system is event driven. As messages are read from the AEU they 
+   are handeled. Event messages are placed onto a queue to be sent to the DB when 
+   time is available.
+  
+   The controller also has a set of timed routines that are executed 
+   based on a set of timers. The events are :
+
+   * Polling - periodically asking the aeu for panels
+   * Update  - reminding the aeu that it should send panel updates when they arrive
+   * Firmware- logging the firmware version of the AEU
+   * Logfile - changing the name of the logfile every month
+   * Troubleshooting - Sending the AEU XONs if communication has stopped
+   * Email   - Sending an email out if the connection has died
+	
+   @author Stewart Grant
+   @version 1.0.0
+   @modified March 14 2016
+*/
+
 include "php_serial.class.php";
 include "dbcontrol.php";
 include "controlclasses.php";
-define ("ACK", chr(6));
+//Short messages to send to the AEU
+define ("ACK", chr(6));	
 define ("NAK", chr(21));
 define ("XON", chr(17));
 define ("XOFF", chr(19));
+
+//Lengths of messages
 define ("SHORTMESSAGELEN", 2);
 define ("LONGMESSAGELEN", 22);
 
@@ -85,7 +109,7 @@ $logfile;
 
 
 
-
+//set the log file for logging, the log file will have the name MonthYear
 setLogFile();
 
 //signal handling
@@ -115,7 +139,7 @@ $serial->deviceClose();
 
 
 	
-/* genMessages checks the message timer to see if any periodic messages such as polling, or update are due to be sent.
+/* taskMannage checks the message timer to see if any periodic messages such as polling, or update are due to be sent.
 if so a message object is generated, and added to the message queue for sending to the aeu*/
 function taskMannage(){
 	global $serial;
@@ -163,7 +187,10 @@ function taskMannage(){
 
 }
 
-//send a message if one is in the queue
+/*
+  sendMessage checks the message queue, if the queue is not empty it pops
+  the message and sends it 
+*/
 function sendMessage(){
 	global $serial;
 	global $messageQueue;
@@ -179,6 +206,12 @@ function sendMessage(){
 	}
 }
 
+/* 
+   getNextPollingRange makes messages to send to the AEU for periodic panel polling.
+   the messages are of the form rAAAA/RRR where AAAA is the account, and RRR
+   is the range. The range, and current account being polled are mannaged by global
+   variables
+*/
 function getNextPollingRange(){
 	global $currentGroup;
 	global $currentAccount;
@@ -196,7 +229,8 @@ function getNextPollingRange(){
 	
 	//update the status of the polling range
 	$currentAccount += $pollingRange;
-
+	
+	//Roll over values if they are over their limit
 	if ($currentAccount > $accounts){
 		$currentAccount = 1;
 		$currentGroup++;
@@ -209,11 +243,29 @@ function getNextPollingRange(){
 	return $m;
 }
 
+/*
+   messageHandle is the main controller for dealing with messages from the AEU
+   When messages are received they are discriminated based on their length.
+
+   Long messages are typically Events, but can also be firmware updates
+   Short messages are typically responses from the AEU after receiving a command
+   	from the web server
+
+   Events are placed on the eventQueue if they are correctly formatted and the
+   checksum is correct. If a message is correctly received, the Websever ACKS the 
+   AEU. If a message cannot be parsed or the checksum is bad the Webserver sends
+   a NAK to the AEU
+
+   This controller is purely event driven, no assumed state from the AEU is
+   maintained or assumed
+
+   @return true if a message is received, false otherwise
+*/
 function messageHandle(){
 	global $serial;
 	global $eventQueue;
 	global $PRODUCTION;
-
+	//read from the serial port
 	$read = $serial->readPort();
 
 	switch (strlen($read)) {
@@ -326,8 +378,12 @@ function parseEventSimulator($message) {
 
 
 
-// etc...
-
+/*
+   genchecksum is for packaging messages to the AEU Simulator, this is not production
+   code. The checksum is two bytes, and is in hex
+	@param message the message to gen the checksum for, it should not allready
+               have a checksum attached
+*/
 function genchecksum($message){
 	$hex = strToHex($message);
 	$csum = 0;
@@ -380,6 +436,7 @@ function checksum($message){
 	
 }
 
+//Convert strings into hex (stolen from stack overflow)
 function strToHex($string){
     $hex = '';
     for ($i=0; $i<strlen($string); $i++){
@@ -390,6 +447,7 @@ function strToHex($string){
     return strToUpper($hex);
 }
 
+//Convert hex into strings (stolen from stack overflow)
 function hexToStr($hex){
     $string='';
     for ($i=0; $i < strlen($hex)-1; $i+=2){
@@ -398,6 +456,20 @@ function hexToStr($hex){
     return $string;
 }
 
+/*
+    insertEvents is the main DB controller, and discrimator as to which events
+    will be entered into the DB.
+
+    The eventQueue is checked for events, while it is not empty they are poped
+    and considered for insertion.
+
+    If an event has a message == "" it is not yet in the DB and is injected
+    If an event has a newer or equal timestamp to the panel zone in the DB it
+    is inserted. Note multiple events can have the same timestamp, in which case
+    order received is used to discriminate.
+    Otherwise the event is considered old and is not inserted into the DB.
+
+*/ 	
 function insertEvents() {
 	global $eventQueue;
 	global $db;
@@ -446,6 +518,12 @@ function insertEvents() {
 	
 }
 
+
+/*
+  setLogFile mannages the logfile for the controller. The file is named after the
+  date and month of the current execution. If the date has changed a new log file is
+  made
+*/
 function setLogFile(){
 	global $logfilename;
 	global $logfile;
@@ -469,6 +547,10 @@ function setLogFile(){
 	return;
 }
 
+/*
+   sendEmail sends a message to Howard Davis, and Stewart Grant stating that the
+   AEU and the webserver have become disconected
+*/
 function sendEmail(){
 	global $taskTimer;
 	//mail functionality		
@@ -492,6 +574,9 @@ cheers,
 	}
 }
 
+/*
+	out echos commands to stdout, and the log file
+*/
 function out($message){
 	global $logfile;
 	$message = "[". $message ."][" . date("ymdhis") ."]\n";
