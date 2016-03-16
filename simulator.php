@@ -61,6 +61,9 @@ function simulateEvents(){
 		$newEvents = rand(0,$newPerRun);
 			
 		for ($i =0;$i < $newEvents; $i++){
+			if ($i%2 == 0){
+				continue;
+			}
 			$panel = new Panel($startingAccount + (rand(0, $groups) * $groupGap) + rand(0, $accountsPerGroup));
 			$panel->as= alarm(); 
 			$panel->at= date(DATE_RFC2822); 
