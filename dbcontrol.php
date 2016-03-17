@@ -1,6 +1,18 @@
 <?php
+/*
+	dbcontroller.php is the controller for the mysql database, the controler
+	is composed of a number of queries that leverage the mysqli API
 
+	@author Stewart Grant
+	@version 1.0.0
+	@modified March 14 2016
+*/	
 
+/*
+	queryEvent queries the database for panels based on an account name
+	a panel object is retured filled with values from the DB, if the Panel
+	does not exist in the DB a default panel is returned.
+*/
 function queryEvent($event) {
 	global $db;
 	$stmt = $db->prepare("
@@ -25,6 +37,12 @@ function queryEvent($event) {
 	return $panel;
 }
 
+/*
+	connectDB is the first call made to start a connection with the mysql
+ 	database. the assumption is that the db is local, named gibil, and has
+	root permisions set.
+*/
+
 function connectDB(){
         $server = '127.0.0.1';
 	$user = 'root';
@@ -42,6 +60,13 @@ function connectDB(){
 			exit();
         }
 }
+
+/*
+	insertPanelDB inserts a panel object into its corresponding place in the
+	db. This method returns an error if the panel is allready in the DB and 0 
+	upon success
+	@return error if panel exists 0 otherwise
+*/
 function insertPanelDB($panel){
     global $db;
 	
@@ -74,6 +99,12 @@ $panel->timestamp,$panel->message);
     }
 }
 
+/*
+	UpdatePanelDB updates a panel in the DB based on a panel object.
+	if the panel does not exist in the DB an error is thrown.
+	0 is returned on success
+	@return error if panel exists, 0 on success
+*/
 function updatePanelDB($panel){
     global $db;
 	

@@ -52,6 +52,9 @@ define ("LOGDIR","/home/gibil/Gibil/logs/");
 /*			Start Execution Here				 */
 //-----------------------------------------------------------------------//
 
+//set the log file for logging, the log file will have the name MonthYear
+setLogFile();
+
 //database
 $db = NULL;
 
@@ -109,8 +112,6 @@ $logfile;
 
 
 
-//set the log file for logging, the log file will have the name MonthYear
-setLogFile();
 
 //signal handling
 declare(ticks=1); // PHP internal, make signal handling work

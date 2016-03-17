@@ -256,7 +256,6 @@ function updateRecent(panels) {
 	}//end for
 }//end updaterecent
 
-
 $(document).ready(function() {
 
 	$('.tabs .tab-links a').on('click', function(e) {
@@ -273,6 +272,7 @@ $(document).ready(function() {
 
 });
 
+/*
 $(document).ready(function() {
 
 $(".content").click(
@@ -299,4 +299,4 @@ else {
  });
 	
 });
-
+*/
