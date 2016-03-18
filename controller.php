@@ -44,7 +44,7 @@ define ("TROUBLESHOOTTIME", 15);
 define ("EMAILTIME", 30);
 define ("EMAILFREQUENCY", 60*60*24);
 
-define ("LOGDIR","/home/gibil/Gibil/logs/");
+define ("LOGDIR","/home/gibil/gibil/logs/");
 
 
 

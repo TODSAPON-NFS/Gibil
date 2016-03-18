@@ -47,8 +47,8 @@ class Event {
 			return $this;
 		}
 		//Parse the date from the message
-		$d = substr($message,1,2);
-		$mon = substr($message,3,2);
+		$mon = substr($message,1,2);
+		$d = substr($message,3,2);
 		$y = substr($message,5,2);
 		$h = substr($message,7,2);
 		$min = substr($message,9,2);
