@@ -165,7 +165,6 @@ function update(panel, id) {
 	}
 	//IP up/down
 	switch (panel["powerwirestate"]){
-	case "0":
 	case "1":
 		idBox.style.color = DEFAULTTEXTCOLOR;
 		idBox.style.backgroundColor = GREEN;
