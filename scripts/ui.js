@@ -1,3 +1,14 @@
+//Author Stewart Grant
+//Updated Tuesday May 30 2017
+
+/* Update Information: The file has been updated to with the functionality to
+ * display IP up/down status in the ID of each panel. The IP up/down status is
+ * encoded as the legacy powerwirestate which was previously unused, this
+ * modification was made for brevity to prevent cascading name changes
+ * throughout the system 
+ - Stewart Grant May 30 2017
+*/
+
 var GREEN = 'rgba(179, 255, 204, 0)';
 var GRAY = '#d3d3d3';
 var AMBER = '#F39720'; //This should really change I dont really like it
@@ -36,7 +47,8 @@ function update(panel, id) {
 		 panel["troublestate"] == "0" &&
 		 panel["supervisorywirestate"] == "0" &&
 		 panel["supervisorystate"] == "0" &&
-		 panel["powerstate"] == "0"
+		 panel["powerstate"] == "0" &&
+		 panel["powerwirestate"] == "0"
 	){
 		idBox.style.backgroundColor = PURPLE;
 	}	
@@ -151,6 +163,20 @@ function update(panel, id) {
 		pBox.style.backgroundColor = AMBER;
 		break;
 	}
+	//IP up/down
+	switch (panel["powerwirestate"]){
+	case "0":
+	case "1":
+		idBox.style.color = DEFAULTTEXTCOLOR;
+		idBox.style.backgroundColor = GREEN;
+		break;
+	case "2":
+		idBox.style.color = tinycolor(YELLOW).darken(40).toRgbString();
+		idBox.style.backgroundColor = YELLOW;
+		break;
+	}
+
+		
 }
 
 //change id recursively  
@@ -187,7 +213,7 @@ function updateRecent(panels) {
 		var tamperStatus = document.getElementById(panel["account"] + "-trouble").style.backgroundColor;
 		var supervisorStatus = document.getElementById(panel["account"] + "-supervisory").style.backgroundColor;
 		var powerStatus = document.getElementById(panel["account"] + "-power").style.backgroundColor;
-			
+	        var ipStatus = document.getElementById(panel["account"] + "-idBox").style.backgroundColor;		
 		
 		//discriminate catagory based on age of the update
 		var eventTime = new Date(panel["timestamp"]);
@@ -210,7 +236,8 @@ function updateRecent(panels) {
 			tinycolor(alarmStatus).toHex() != tinycolor(RED).toHex() && 
 			tinycolor(tamperStatus).toHex() != tinycolor(YELLOW).toHex() && 
 			tinycolor(supervisorStatus).toHex() != tinycolor(BLUE).toHex() && 
-			tinycolor(powerStatus).toHex() != tinycolor(AMBER).toHex()
+			tinycolor(powerStatus).toHex() != tinycolor(AMBER).toHex() &&
+			tinycolor(ipStatus).toHex() != tinycolor(YELLOW).toHex()
 		) {
 			newlyOkPanel = document.getElementById(clone.id);
 			//if the panel was in the new or old list remove it
