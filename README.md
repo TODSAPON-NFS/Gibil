@@ -1,4 +1,6 @@
-#Fire Alarm Display server
+# Fire Alarm Display server
+
+![FAD Diagram](https://s9.postimg.org/jmcpax7rz/archetecture.png) 
 
 This server displays fire alarm events generated at on the UBC Vancouver
 campus. This README is an installation guide, for the server, and it's
@@ -34,29 +36,29 @@ manager (software installer) for the Ubuntu operating system.
 The following commands issued in order on a bash command prompt complete the
 installation and configuration of the LAMP stack
 
-###install lamp stack
+### install lamp stack
 
 `sudo apt-get update`
 `sudo apt-get install lamp-server`
 
-###update PHP to latest
+### update PHP to latest
 
 `sudo apt-get install PHP5-json`
 
-###set SQL database root password to (THIS PASSWORD IS MANDATORY!)
+### set SQL database root password to (THIS PASSWORD IS MANDATORY!)
 
 `iwicbV15`
 
 ## Installation Steps (Fire Alarm Display Server)
 
-###install git
+### install git
 
 [git](https://git-scm.com/) is a version control tool for managing software.
 The Fire Alarm Display server is managed by a git repository. Install git
 with the command.
 `sudo apt-get install git`
 
-###clone repository to home directory 
+### clone repository to home directory 
 
 The Fire Alarm Display server is
 managed as a private git repository on Github.com under the code name
@@ -74,7 +76,7 @@ If access to the repository is not granted, request a
 `cd`
 `tar -xvzf name_of_tarball.tar.gz`
 
-###initialize the db
+### initialize the db
 
 The Fire Alarm Display relies on a MySQL database to store panel status. The
 database schema is initialized by running the initdb script stored in the
@@ -82,7 +84,7 @@ Gibil directory.
 
 `mysql -u root -p < initdb.sql`
 
-###link Apache to Gibil
+### link Apache to Gibil
 The Apache Web server serves content out of the /var/www/html directory by default. The Fire Alarm Web server will not be view able until its directory is linked to Apaches.
 
 `cd /var/www/html`
@@ -108,7 +110,7 @@ from serial connections.
 Linux reads and writes to serial connections via the \dev\ttyS\_\#,(where \# is
 the number of the serial interface).
 
-`sudo chmod 777 \dev\ttyS\_\#`
+`sudo chmod 777 \dev\ttyS\_#`
 
 
 ## Install Background maintenance service 
